@@ -18,12 +18,17 @@ Also, if user already has an account, they can go to page from here.
 
 */
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_button.dart';
+import 'package:flutter_twitter_clone/presentation/components/my_loading.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_textfield.dart';
 import 'package:flutter_twitter_clone/navigation/go_router.dart';
+import 'package:flutter_twitter_clone/presentation/provider/auth_provider.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -42,6 +47,45 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthenticationProvider>(context);
+
+    //register
+    void register() async {
+      //password match -> create user
+      if (passwordController.text == confirmPasswordController.text) {
+        showLoadingCircle(context);
+        try {
+          await authProvider.register(
+              emailController.text, passwordController.text);
+          if (context.mounted) hideLoadingCircle(context);
+        } catch (e) {
+          if (context.mounted) hideLoadingCircle(context);
+          if (context.mounted) {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text(e.toString()),
+                );
+              },
+            );
+          }
+        }
+      }
+
+      //password didnt math -> show error
+      else {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return const AlertDialog(
+              title: Text("Passwords don't match!"),
+            );
+          },
+        );
+      }
+    }
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
@@ -105,7 +149,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 //register button
                 MyButton(
                   text: 'Register',
-                  onClick: () {},
+                  onClick: register,
                 ),
 
                 const Gap(50),

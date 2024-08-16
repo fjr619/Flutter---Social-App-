@@ -58,7 +58,16 @@ class _LoginPageState extends State<LoginPage> {
       } catch (e) {
         // finished loading
         if (context.mounted) hideLoadingCircle(context);
-        log("error $e");
+        if (context.mounted) {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text(e.toString()),
+              );
+            },
+          );
+        }
       }
     }
 

@@ -20,6 +20,10 @@ class AuthenticationProvider extends ChangeNotifier {
     await _authRepository.login(email, password);
   }
 
+  Future<void> register(String email, String password) async {
+    await _authRepository.register(email, password);
+  }
+
   Future<void> logout() async {
     await _authRepository.logout();
   }

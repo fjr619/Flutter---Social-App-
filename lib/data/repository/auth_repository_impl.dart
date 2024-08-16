@@ -40,7 +40,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
     // catch any errors
     on FirebaseAuthException catch (e) {
-      throw Exception(e.code);
+      throw Exception(e.message);
     }
   }
 
@@ -53,7 +53,7 @@ class AuthRepositoryImpl implements AuthRepository {
           email: email, password: password);
       return userCredential;
     } on FirebaseAuthException catch (e) {
-      throw Exception(e.code);
+      throw Exception(e.message);
     }
   }
 
