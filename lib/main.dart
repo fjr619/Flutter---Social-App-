@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/di/get_it.dart';
 import 'package:flutter_twitter_clone/firebase_options.dart';
 import 'package:flutter_twitter_clone/navigation/go_router.dart';
-import 'package:flutter_twitter_clone/provider/auth_provider.dart';
-import 'package:flutter_twitter_clone/themes/theme_provider.dart';
+import 'package:flutter_twitter_clone/presentation/provider/auth_provider.dart';
+import 'package:flutter_twitter_clone/presentation/provider/theme_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -15,7 +15,7 @@ void main() async {
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => ThemeProvider()),
     ChangeNotifierProvider(create: (context) => AuthenticationProvider()),
-    router(),
+    router(AuthenticationProvider()),
   ], child: const MyApp()));
 }
 

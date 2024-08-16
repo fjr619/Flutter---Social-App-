@@ -19,8 +19,8 @@ Also, if user already has an account, they can go to page from here.
 */
 
 import 'package:flutter/material.dart';
-import 'package:flutter_twitter_clone/components/my_button.dart';
-import 'package:flutter_twitter_clone/components/my_textfield.dart';
+import 'package:flutter_twitter_clone/presentation/components/my_button.dart';
+import 'package:flutter_twitter_clone/presentation/components/my_textfield.dart';
 import 'package:flutter_twitter_clone/navigation/go_router.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
@@ -123,7 +123,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     InkWell(
                       borderRadius: BorderRadius.circular(8),
                       onTap: () {
-                        context.pushReplacementNamed(AppRoute.login);
+                        context.goNamed(AppRoute.login);
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(5),

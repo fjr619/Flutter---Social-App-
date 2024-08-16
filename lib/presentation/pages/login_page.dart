@@ -1,13 +1,14 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_twitter_clone/components/my_button.dart';
-import 'package:flutter_twitter_clone/components/my_textfield.dart';
-import 'package:flutter_twitter_clone/di/get_it.dart';
+import 'package:flutter_twitter_clone/presentation/components/my_button.dart';
+import 'package:flutter_twitter_clone/presentation/components/my_loading.dart';
+import 'package:flutter_twitter_clone/presentation/components/my_textfield.dart';
 import 'package:flutter_twitter_clone/navigation/go_router.dart';
-import 'package:flutter_twitter_clone/service/auth_service.dart';
+import 'package:flutter_twitter_clone/presentation/provider/auth_provider.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 /*
 
@@ -38,10 +39,29 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  final authService = getIt<AuthService>();
-
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthenticationProvider>(context);
+
+    void login() async {
+      //show loading
+      showLoadingCircle(context);
+
+      try {
+        // trying to login
+        await authProvider.login(emailController.text, passwordController.text);
+
+        // finished loading
+        if (context.mounted) hideLoadingCircle(context);
+
+        // catch any errors
+      } catch (e) {
+        // finished loading
+        if (context.mounted) hideLoadingCircle(context);
+        log("error $e");
+      }
+    }
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
@@ -109,14 +129,7 @@ class _LoginPageState extends State<LoginPage> {
                 //sign in button
                 MyButton(
                   text: 'Login',
-                  onClick: () async {
-                    try {
-                      await authService.loginEmailPassword(
-                          emailController.text, passwordController.text);
-                    } catch (e) {
-                      log("error $e");
-                    }
-                  },
+                  onClick: login,
                 ),
 
                 const Gap(50),
@@ -134,7 +147,7 @@ class _LoginPageState extends State<LoginPage> {
                     InkWell(
                       borderRadius: BorderRadius.circular(8),
                       onTap: () {
-                        context.pushReplacementNamed(AppRoute.register);
+                        context.goNamed(AppRoute.register);
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(5),

@@ -7,8 +7,8 @@ This help us change the app from dark to light mode
 */
 
 import 'package:flutter/material.dart';
-import 'package:flutter_twitter_clone/themes/dark_mode.dart';
-import 'package:flutter_twitter_clone/themes/light_mode.dart';
+import 'package:flutter_twitter_clone/presentation/themes/dark_mode.dart';
+import 'package:flutter_twitter_clone/presentation/themes/light_mode.dart';
 
 class ThemeProvider with ChangeNotifier {
   //initially, set it as light mode

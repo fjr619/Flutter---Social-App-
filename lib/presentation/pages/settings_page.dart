@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_twitter_clone/components/my_settings_tile.dart';
-import 'package:flutter_twitter_clone/themes/theme_provider.dart';
+import 'package:flutter_twitter_clone/presentation/components/my_settings_tile.dart';
+import 'package:flutter_twitter_clone/presentation/provider/theme_provider.dart';
 import 'package:provider/provider.dart';
 
 /*

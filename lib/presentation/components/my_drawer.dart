@@ -17,15 +17,19 @@ Contains 5 menu options:
 */
 
 import 'package:flutter/material.dart';
-import 'package:flutter_twitter_clone/components/my_drawer_tile.dart';
-import 'package:flutter_twitter_clone/di/get_it.dart';
-import 'package:flutter_twitter_clone/navigation/go_router.dart';
-import 'package:flutter_twitter_clone/service/auth_service.dart';
+import 'package:flutter_twitter_clone/presentation/components/my_drawer_tile.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 
 class MyDrawer extends StatelessWidget {
-  const MyDrawer({super.key});
+  const MyDrawer(
+      {super.key,
+      required this.onClickHome,
+      required this.onClickSettings,
+      required this.onClickLogout});
+
+  final Function() onClickHome;
+  final Function() onClickSettings;
+  final Function() onClickLogout;
 
   // Build UI
   @override
@@ -57,10 +61,7 @@ class MyDrawer extends StatelessWidget {
               MyDrawerTile(
                 title: 'H O M E',
                 icon: Icons.home,
-                onClick: () {
-                  //pop menu drawer since we are already at home
-                  context.pop();
-                },
+                onClick: onClickHome,
               ),
 
               // profile
@@ -81,23 +82,19 @@ class MyDrawer extends StatelessWidget {
               MyDrawerTile(
                 title: 'S E T T I N G S',
                 icon: Icons.settings,
-                onClick: () {
-                  //pop menu drawer
-                  context.pop();
-
-                  //go to settings page
-                  context.pushNamed(AppRoute.settings);
-                },
+                onClick: onClickSettings,
               ),
+
+              const Spacer(),
 
               // logout
               MyDrawerTile(
                 title: 'L O G O U T',
                 icon: Icons.logout,
-                onClick: () async {
-                  await getIt<AuthService>().logout();
-                },
+                onClick: onClickLogout,
               ),
+
+              const Gap(16),
             ],
           ),
         ),
