@@ -18,7 +18,9 @@ Contains 5 menu options:
 
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/components/my_drawer_tile.dart';
+import 'package:flutter_twitter_clone/di/get_it.dart';
 import 'package:flutter_twitter_clone/navigation/go_router.dart';
+import 'package:flutter_twitter_clone/service/auth_service.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
@@ -92,7 +94,9 @@ class MyDrawer extends StatelessWidget {
               MyDrawerTile(
                 title: 'L O G O U T',
                 icon: Icons.logout,
-                onClick: () {},
+                onClick: () async {
+                  await getIt<AuthService>().logout();
+                },
               ),
             ],
           ),

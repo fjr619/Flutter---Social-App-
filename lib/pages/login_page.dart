@@ -1,8 +1,11 @@
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/components/my_button.dart';
 import 'package:flutter_twitter_clone/components/my_textfield.dart';
+import 'package:flutter_twitter_clone/di/get_it.dart';
 import 'package:flutter_twitter_clone/navigation/go_router.dart';
+import 'package:flutter_twitter_clone/service/auth_service.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
@@ -34,6 +37,8 @@ class _LoginPageState extends State<LoginPage> {
   //text controllers
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  final authService = getIt<AuthService>();
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +109,14 @@ class _LoginPageState extends State<LoginPage> {
                 //sign in button
                 MyButton(
                   text: 'Login',
-                  onClick: () {},
+                  onClick: () async {
+                    try {
+                      await authService.loginEmailPassword(
+                          emailController.text, passwordController.text);
+                    } catch (e) {
+                      log("error $e");
+                    }
+                  },
                 ),
 
                 const Gap(50),

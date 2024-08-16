@@ -1,14 +1,21 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/di/get_it.dart';
+import 'package:flutter_twitter_clone/firebase_options.dart';
 import 'package:flutter_twitter_clone/navigation/go_router.dart';
+import 'package:flutter_twitter_clone/provider/auth_provider.dart';
 import 'package:flutter_twitter_clone/themes/theme_provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await setupLocator();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => ThemeProvider()),
+    ChangeNotifierProvider(create: (context) => AuthenticationProvider()),
+    router(),
   ], child: const MyApp()));
 }
 
@@ -19,6 +26,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final router = Provider.of<GoRouter>(context);
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
