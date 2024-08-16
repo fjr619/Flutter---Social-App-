@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/pages/home_page.dart';
 import 'package:flutter_twitter_clone/pages/login_page.dart';
+import 'package:flutter_twitter_clone/pages/register_page.dart';
 import 'package:flutter_twitter_clone/pages/settings_page.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,6 +9,7 @@ class AppRoute {
   static const String home = "Home";
   static const String settings = "Settings";
   static const String login = "Login";
+  static const String register = "Register";
 }
 
 final router = GoRouter(
@@ -28,7 +30,6 @@ final router = GoRouter(
         key: state.pageKey,
         child: const SettingsPage(),
       ),
-      builder: (context, state) => const SettingsPage(),
     ),
     GoRoute(
       name: AppRoute.login,
@@ -37,7 +38,14 @@ final router = GoRouter(
         key: state.pageKey,
         child: const LoginPage(),
       ),
-      builder: (context, state) => const LoginPage(),
+    ),
+    GoRoute(
+      name: AppRoute.register,
+      path: '/register',
+      pageBuilder: (context, state) => _buildTransitionpage(
+        key: state.pageKey,
+        child: const RegisterPage(),
+      ),
     ),
   ],
 );

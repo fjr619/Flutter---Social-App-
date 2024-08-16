@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_twitter_clone/di/get_it.dart';
 import 'package:flutter_twitter_clone/navigation/go_router.dart';
 import 'package:flutter_twitter_clone/themes/theme_provider.dart';
@@ -8,13 +7,9 @@ import 'package:provider/provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await setupLocator();
-  runApp(AnnotatedRegion<SystemUiOverlayStyle>(
-    value:
-        SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
-    child: MultiProvider(providers: [
-      ChangeNotifierProvider(create: (context) => getIt<ThemeProvider>()),
-    ], child: const MyApp()),
-  ));
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (context) => ThemeProvider()),
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {

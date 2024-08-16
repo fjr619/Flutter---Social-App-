@@ -18,6 +18,7 @@ Contains 5 menu options:
 
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/components/my_drawer_tile.dart';
+import 'package:flutter_twitter_clone/navigation/go_router.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
@@ -83,8 +84,7 @@ class MyDrawer extends StatelessWidget {
                   context.pop();
 
                   //go to settings page
-                  GoRouter.of(context).pushNamed('Settings');
-                  // context.pushNamed('Settings');
+                  context.pushNamed(AppRoute.settings);
                 },
               ),
 

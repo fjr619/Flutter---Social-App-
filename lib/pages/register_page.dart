@@ -1,3 +1,22 @@
+/*
+
+REGIISTER PAGE
+
+On this page, a new user can fill out the form and create an account.
+The data we want from the user is:
+
+- name
+- email,
+- password,
+- confirm password
+
+__________________________________
+
+Once the user successfully creates an account -> they will be redirected to home page.
+
+Also, if user already has an account, they can go to page from here.
+
+*/
 
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/components/my_button.dart';
@@ -6,34 +25,20 @@ import 'package:flutter_twitter_clone/navigation/go_router.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-/*
-
-LOGIN PAGE
-
-On this page, an existing user can log in with their: 
-
-- email
-- password
-
-_____________
-
-Once the user successfully logs in, they will be redirected to the home page.
-
-If the user doesn't have an account yet, they can go to the register page from here.
-
-*/
-
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   //text controllers
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -56,19 +61,27 @@ class _LoginPageState extends State<LoginPage> {
 
                 const Gap(50),
 
-                //Welcome back message
+                // create an account message
                 Text(
-                  'Welcome back, you\'ve been missed!',
+                  "Let's create an account for you",
                   style:
                       TextStyle(color: Theme.of(context).colorScheme.primary),
                 ),
 
                 const Gap(25),
 
+                //name textfield
+                MyTextfield(
+                    textEditingController: nameController,
+                    hintText: 'Enter name',
+                    obscureText: false),
+
+                const Gap(10),
+
                 //email textfield
                 MyTextfield(
                     textEditingController: emailController,
-                    hintText: 'Enter Email',
+                    hintText: 'Enter email',
                     obscureText: false),
 
                 const Gap(10),
@@ -81,40 +94,28 @@ class _LoginPageState extends State<LoginPage> {
 
                 const Gap(10),
 
-                //forgot password
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: () {},
-                    child: Padding(
-                      padding: const EdgeInsets.all(5),
-                      child: Text(
-                        'Forgot password',
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                ),
+                //password textfield
+                MyTextfield(
+                    textEditingController: confirmPasswordController,
+                    hintText: 'Enter confirm password',
+                    obscureText: true),
 
                 const Gap(25),
 
-                //sign in button
+                //register button
                 MyButton(
-                  text: 'Login',
+                  text: 'Register',
                   onClick: () {},
                 ),
 
                 const Gap(50),
 
-                //not a member? register now
+                // already a member? login here
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Not a member?',
+                      'Already a member?',
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.primary),
                     ),
@@ -122,12 +123,12 @@ class _LoginPageState extends State<LoginPage> {
                     InkWell(
                       borderRadius: BorderRadius.circular(8),
                       onTap: () {
-                        context.pushReplacementNamed(AppRoute.register);
+                        context.pushReplacementNamed(AppRoute.login);
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(5),
                         child: Text(
-                          'Register now',
+                          'Login now',
                           style: TextStyle(
                               color: Theme.of(context).colorScheme.primary,
                               fontWeight: FontWeight.bold),
