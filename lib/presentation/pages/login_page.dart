@@ -44,136 +44,132 @@ class _LoginPageState extends State<LoginPage> {
     final authProvider = Provider.of<AuthenticationProvider>(context);
 
     void login() async {
-      //show loading
-      showLoadingCircle(context);
-
-      try {
-        // trying to login
-        await authProvider.login(emailController.text, passwordController.text);
-
-        // finished loading
-        if (context.mounted) hideLoadingCircle(context);
-
-        // catch any errors
-      } catch (e) {
-        // finished loading
-        if (context.mounted) hideLoadingCircle(context);
-        if (context.mounted) {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: Text(e.toString()),
-              );
-            },
-          );
-        }
-      }
+      await authProvider.login(emailController.text, passwordController.text);
     }
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 25),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // const Gap(50),
-                //Logo
-                Icon(
-                  Icons.lock_open_rounded,
-                  size: 72,
-                  color: Theme.of(context).colorScheme.primary,
+      body: Consumer<AuthenticationProvider>(
+        builder: (context, value, child) {
+          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+            if (authProvider.isLoading) {
+              showLoadingCircle(context);
+            } else if (authProvider.errorMessage?.isNotEmpty == true) {
+              if (context.canPop()) context.pop();
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text("ERROR ${authProvider.errorMessage}"),
                 ),
+              );
+            } else {
+              if (context.canPop()) context.pop();
+            }
+          });
 
-                const Gap(50),
-
-                //Welcome back message
-                Text(
-                  'Welcome back, you\'ve been missed!',
-                  style:
-                      TextStyle(color: Theme.of(context).colorScheme.primary),
-                ),
-
-                const Gap(25),
-
-                //email textfield
-                MyTextfield(
-                    textEditingController: emailController,
-                    hintText: 'Enter Email',
-                    obscureText: false),
-
-                const Gap(10),
-
-                //password textfield
-                MyTextfield(
-                    textEditingController: passwordController,
-                    hintText: 'Enter password',
-                    obscureText: true),
-
-                const Gap(10),
-
-                //forgot password
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: () {},
-                    child: Padding(
-                      padding: const EdgeInsets.all(5),
-                      child: Text(
-                        'Forgot password',
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const Gap(25),
-
-                //sign in button
-                MyButton(
-                  text: 'Login',
-                  onClick: login,
-                ),
-
-                const Gap(50),
-
-                //not a member? register now
-                Row(
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25),
+              child: Center(
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    // const Gap(50),
+                    //Logo
+                    Icon(
+                      Icons.lock_open_rounded,
+                      size: 72,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+
+                    const Gap(50),
+
+                    //Welcome back message
                     Text(
-                      'Not a member?',
+                      'Welcome back, you\'ve been missed!',
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.primary),
                     ),
-                    const Gap(5),
-                    InkWell(
-                      borderRadius: BorderRadius.circular(8),
-                      onTap: () {
-                        context.goNamed(AppRoute.register);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(5),
-                        child: Text(
-                          'Register now',
-                          style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.bold),
+
+                    const Gap(25),
+
+                    //email textfield
+                    MyTextfield(
+                        textEditingController: emailController,
+                        hintText: 'Enter Email',
+                        obscureText: false),
+
+                    const Gap(10),
+
+                    //password textfield
+                    MyTextfield(
+                        textEditingController: passwordController,
+                        hintText: 'Enter password',
+                        obscureText: true),
+
+                    const Gap(10),
+
+                    //forgot password
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: () {},
+                        child: Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: Text(
+                            'Forgot password',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
                     ),
+
+                    const Gap(25),
+
+                    //sign in button
+                    MyButton(
+                      text: 'Login',
+                      onClick: login,
+                    ),
+
+                    const Gap(50),
+
+                    //not a member? register now
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Not a member?',
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary),
+                        ),
+                        const Gap(5),
+                        InkWell(
+                          borderRadius: BorderRadius.circular(8),
+                          onTap: () {
+                            context.goNamed(AppRoute.register);
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(5),
+                            child: Text(
+                              'Register now',
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

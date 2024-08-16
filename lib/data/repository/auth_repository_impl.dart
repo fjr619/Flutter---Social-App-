@@ -12,13 +12,14 @@ ____________________________
 
 */
 
+import 'package:either_dart/either.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_twitter_clone/di/get_it.dart';
+import 'package:flutter_twitter_clone/domain/model/failure.dart';
 import 'package:flutter_twitter_clone/domain/repository/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final FirebaseAuth _firebaseAuth;
-
-  AuthRepositoryImpl(this._firebaseAuth);
+  final FirebaseAuth _firebaseAuth = getIt<FirebaseAuth>();
 
   @override
   Stream<User?> authStateChanges() {
@@ -30,30 +31,35 @@ class AuthRepositoryImpl implements AuthRepository {
 
   //login -> email and password
   @override
-  Future<UserCredential> login(String email, String password) async {
+  Future<Either<Failure, UserCredential>> login(
+      String email, String password) async {
     // attempt login
     try {
       final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
           email: email, password: password);
-      return userCredential;
+      return Right(userCredential);
     }
 
     // catch any errors
     on FirebaseAuthException catch (e) {
-      throw Exception(e.message);
+      return Left(ServerFailure(e.message));
     }
   }
 
   // register
   @override
-  Future<UserCredential> register(String email, String password) async {
+  Future<Either<Failure, UserCredential>> register(
+      String email, String password) async {
     // attemp to register new user
     try {
       final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
           email: email, password: password);
-      return userCredential;
-    } on FirebaseAuthException catch (e) {
-      throw Exception(e.message);
+      return Right(userCredential);
+    }
+
+    // catch any errors
+    on FirebaseAuthException catch (e) {
+      return Left(ServerFailure(e.message));
     }
   }
 

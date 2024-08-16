@@ -60,7 +60,7 @@ Provider<GoRouter> router(AuthenticationProvider authProvider) {
             path: '/login',
             pageBuilder: (context, state) => _buildTransitionpage(
               key: state.pageKey,
-              child: const LoginPage(),
+              child: LoginPage(),
             ),
           ),
           GoRoute(
