@@ -1,11 +1,10 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/presentation/pages/home_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/login_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/register_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/settings_page.dart';
 import 'package:flutter_twitter_clone/presentation/provider/auth_provider.dart';
+import 'package:flutter_twitter_clone/presentation/provider/firestore_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -16,33 +15,47 @@ class AppRoute {
   static const String register = "Register";
 }
 
-Provider<GoRouter> router(AuthenticationProvider authProvider) {
+Provider<GoRouter> router() {
   List<String> routes = ["/login", "/register"];
 
   return Provider(
     create: (context) {
+      AuthenticationProvider authProvider =
+          Provider.of<AuthenticationProvider>(context, listen: false);
+      FirestoreProvider firestoreProvider =
+          Provider.of<FirestoreProvider>(context, listen: false);
+
       return GoRouter(
-        refreshListenable: authProvider,
+        refreshListenable: Listenable.merge([
+          firestoreProvider,
+          authProvider,
+        ]),
         initialLocation: authProvider.isLoggedIn ? "/home" : "/login",
         redirect: (context, state) {
-          log('state ${state.fullPath}');
           final isLoggedIn = authProvider.isLoggedIn;
-          final isLoggingIn = routes.contains(state.matchedLocation);
+          final isLoggingIn = state.uri.toString() == '/login';
+          final isRegister = state.uri.toString() == '/register';
+          final isStateUriNotAuthRoute = routes.contains(state.matchedLocation);
+          final isSaveUserProfile = firestoreProvider.isSaveUserProfile;
 
-          if (!isLoggedIn && !isLoggingIn) {
-            // Jika belum login dan bukan di halaman login, arahkan ke halaman login
+          if (!isLoggedIn && !isStateUriNotAuthRoute) {
+            // Jika belum login dan bukan di halaman login atau register, arahkan ke halaman login
             return '/login';
           } else if (isLoggedIn && isLoggingIn) {
             // Jika sudah login dan berada di halaman login, arahkan ke homepage
             return '/home';
+          } else if (isLoggedIn && isRegister && isSaveUserProfile) {
+            // Jika sudah register dan berada di halaman register, arahkan ke homepage
+            return '/home';
           }
+
           return null; // Tetap di halaman yang diminta
         },
         routes: [
           GoRoute(
             name: AppRoute.home,
             path: '/home',
-            pageBuilder: (context, state) => _buildTransitionpage(
+            pageBuilder: (context, state) => buildTransitionpage(
               key: state.pageKey,
               child: const HomePage(),
             ),
@@ -50,7 +63,7 @@ Provider<GoRouter> router(AuthenticationProvider authProvider) {
           GoRoute(
             name: AppRoute.settings,
             path: '/settings',
-            pageBuilder: (context, state) => _buildTransitionpage(
+            pageBuilder: (context, state) => buildTransitionpage(
               key: state.pageKey,
               child: const SettingsPage(),
             ),
@@ -58,15 +71,15 @@ Provider<GoRouter> router(AuthenticationProvider authProvider) {
           GoRoute(
             name: AppRoute.login,
             path: '/login',
-            pageBuilder: (context, state) => _buildTransitionpage(
+            pageBuilder: (context, state) => buildTransitionpage(
               key: state.pageKey,
-              child: LoginPage(),
+              child: const LoginPage(),
             ),
           ),
           GoRoute(
             name: AppRoute.register,
             path: '/register',
-            pageBuilder: (context, state) => _buildTransitionpage(
+            pageBuilder: (context, state) => buildTransitionpage(
               key: state.pageKey,
               child: const RegisterPage(),
             ),
@@ -77,7 +90,7 @@ Provider<GoRouter> router(AuthenticationProvider authProvider) {
   );
 }
 
-CustomTransitionPage _buildTransitionpage<T>({
+CustomTransitionPage buildTransitionpage<T>({
   required LocalKey key,
   required Widget child,
   Duration duration = const Duration(milliseconds: 200), // Durasi default 300ms

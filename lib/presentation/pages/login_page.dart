@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_button.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_loading.dart';

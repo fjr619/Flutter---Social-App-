@@ -12,7 +12,7 @@ ____________________________
 
 */
 
-import 'package:either_dart/either.dart';
+import 'package:eitherx/eitherx.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_twitter_clone/di/get_it.dart';
 import 'package:flutter_twitter_clone/domain/model/failure.dart';

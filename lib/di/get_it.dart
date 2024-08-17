@@ -13,6 +13,15 @@ Future<void> setupLocator() async {
   // Register FirebaseAuth
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
 
+  // Register Firestore
+  getIt.registerLazySingleton<FirebaseFirestore>(
+    () => FirebaseFirestore.instance,
+  );
+
   //Repositories
   getIt.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl());
+
+  getIt.registerLazySingleton<DatabaseRepository>(
+    () => DatabaseRepositoryImpl(),
+  );
 }

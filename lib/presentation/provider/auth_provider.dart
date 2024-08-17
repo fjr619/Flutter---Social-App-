@@ -40,6 +40,7 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   Future<void> register(String email, String password) async {
+    log("start register");
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -50,6 +51,7 @@ class AuthenticationProvider extends ChangeNotifier {
     }, (_) {});
 
     _isLoading = false;
+    log("finish register");
     notifyListeners();
   }
 

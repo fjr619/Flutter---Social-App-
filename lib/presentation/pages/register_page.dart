@@ -18,14 +18,13 @@ Also, if user already has an account, they can go to page from here.
 
 */
 
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_button.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_loading.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_textfield.dart';
 import 'package:flutter_twitter_clone/navigation/go_router.dart';
 import 'package:flutter_twitter_clone/presentation/provider/auth_provider.dart';
+import 'package:flutter_twitter_clone/presentation/provider/firestore_provider.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -48,29 +47,17 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthenticationProvider>(context);
+    final firestoreProvider = Provider.of<FirestoreProvider>(context);
 
     //register
     void register() async {
       //password match -> create user
       if (passwordController.text == confirmPasswordController.text) {
-        // showLoadingCircle(context);
-        // try {
         await authProvider.register(
             emailController.text, passwordController.text);
-        //   if (context.mounted) hideLoadingCircle(context);
-        // } catch (e) {
-        //   if (context.mounted) hideLoadingCircle(context);
-        //   if (context.mounted) {
-        //     showDialog(
-        //       context: context,
-        //       builder: (context) {
-        //         return AlertDialog(
-        //           title: Text(e.toString()),
-        //         );
-        //       },
-        //     );
-        //   }
-        // }
+
+        await firestoreProvider.saveUserProfile(
+            name: nameController.text, email: emailController.text);
       }
 
       //password didnt math -> show error
@@ -89,7 +76,8 @@ class _RegisterPageState extends State<RegisterPage> {
     return Consumer<AuthenticationProvider>(
       builder: (context, value, child) {
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-          if (authProvider.isLoading) {
+          if (authProvider.isLoading || firestoreProvider.isLoading) {
+            if (context.canPop()) context.pop();
             showLoadingCircle(context);
           } else if (authProvider.errorMessage?.isNotEmpty == true) {
             if (context.canPop()) context.pop();
