@@ -39,20 +39,26 @@ class AuthenticationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> register(String email, String password) async {
+  Future<bool> register(String email, String password) async {
     log("start register");
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
+    var isSucceed = false;
+
     final result = await _authRepository.register(email, password);
     result.fold((failure) {
       _errorMessage = failure.message;
-    }, (_) {});
+      isSucceed = false;
+    }, (_) {
+      isSucceed = true;
+    });
 
     _isLoading = false;
     log("finish register");
     notifyListeners();
+    return isSucceed;
   }
 
   Future<void> logout() async {

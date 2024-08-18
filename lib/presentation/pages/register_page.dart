@@ -18,6 +18,8 @@ Also, if user already has an account, they can go to page from here.
 
 */
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_button.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_loading.dart';
@@ -53,11 +55,13 @@ class _RegisterPageState extends State<RegisterPage> {
     void register() async {
       //password match -> create user
       if (passwordController.text == confirmPasswordController.text) {
-        await authProvider.register(
+        bool isSucceed = await authProvider.register(
             emailController.text, passwordController.text);
 
-        await firestoreProvider.saveUserProfile(
-            name: nameController.text, email: emailController.text);
+        if (isSucceed) {
+          await firestoreProvider.saveUserProfile(
+              name: nameController.text, email: emailController.text);
+        }
       }
 
       //password didnt math -> show error
