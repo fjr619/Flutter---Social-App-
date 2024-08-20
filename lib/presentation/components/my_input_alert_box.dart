@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
 /*
 
   INPUT ALERT BOX
@@ -15,13 +18,6 @@
   - text for button
 
 */
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_twitter_clone/main.dart';
-import 'package:flutter_twitter_clone/presentation/pages/register_page.dart';
-import 'package:go_router/go_router.dart';
 
 class MyInputAlertBox extends StatelessWidget {
   final TextEditingController textController;

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/presentation/pages/home_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/login_page.dart';
