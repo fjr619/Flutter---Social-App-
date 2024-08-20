@@ -24,10 +24,12 @@ class MyDrawer extends StatelessWidget {
   const MyDrawer(
       {super.key,
       required this.onClickHome,
+      required this.onClickProfile,
       required this.onClickSettings,
       required this.onClickLogout});
 
   final Function() onClickHome;
+  final Function() onClickProfile;
   final Function() onClickSettings;
   final Function() onClickLogout;
 
@@ -68,7 +70,7 @@ class MyDrawer extends StatelessWidget {
               MyDrawerTile(
                 title: 'P R O F I L E',
                 icon: Icons.person_2,
-                onClick: () {},
+                onClick: onClickProfile,
               ),
 
               // search

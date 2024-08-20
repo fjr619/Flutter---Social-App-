@@ -4,7 +4,6 @@ import 'package:flutter_twitter_clone/data/repository/auth_repository_impl.dart'
 import 'package:flutter_twitter_clone/data/repository/database_repository_impl.dart';
 import 'package:flutter_twitter_clone/domain/repository/auth_repository.dart';
 import 'package:flutter_twitter_clone/domain/repository/database_repository.dart';
-import 'package:flutter_twitter_clone/service/auth_service.dart';
 import 'package:get_it/get_it.dart';
 
 final getIt = GetIt.instance;

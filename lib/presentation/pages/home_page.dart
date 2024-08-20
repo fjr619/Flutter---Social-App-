@@ -18,23 +18,21 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthenticationProvider>(context);
-
     void logout() async {
       //show loading
       showLoadingCircle(context);
 
       try {
         // trying to login
-        await authProvider.logout();
+        await context.read<AuthenticationProvider>().logout();
 
         // finished loading
-        if (mounted) hideLoadingCircle(context);
+        if (context.mounted) hideLoadingCircle(context);
 
         // catch any errors
       } catch (e) {
         // finished loading
-        if (mounted) hideLoadingCircle(context);
+        if (context.mounted) hideLoadingCircle(context);
         log("error $e");
       }
     }
@@ -43,11 +41,15 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       drawer: MyDrawer(
         onClickHome: () => context.pop(),
-        onClickSettings: () {
-          //pop menu drawer
+        onClickProfile: () {
+          log('uid ${context.read<AuthenticationProvider>().currentUser?.uid}');
           context.pop();
-
-          //go to settings page
+          context.pushNamed(AppRoute.profile, pathParameters: {
+            'uid': context.read<AuthenticationProvider>().currentUser!.uid
+          });
+        },
+        onClickSettings: () {
+          context.pop();
           context.pushNamed(AppRoute.settings);
         },
         onClickLogout: logout,

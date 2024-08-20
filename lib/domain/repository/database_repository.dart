@@ -6,4 +6,5 @@ abstract class DatabaseRepository {
   Future<Either<Failure, Unit>> saveUserProfile(
       {required String name, required String email});
   Future<Either<Failure, UserProfile?>> getUserProfile(String uid);
+  Future<Either<Failure, Unit>> updateUserBio(String bio);
 }

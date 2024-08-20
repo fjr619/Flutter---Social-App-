@@ -78,6 +78,20 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, Unit>> updateUserBio(String bio) async {
+    // get current uid
+    String uid = _auth.currentUser!.uid;
+
+    // attempt to update in firebase
+    try {
+      await _db.collection('Users').doc(uid).update({'bio': bio});
+      return const Right(unit);
+    } catch (e) {
+      return const Left(ServerFailure("Error updateUserBio"));
+    }
+  }
+
   /**
    * 
    */

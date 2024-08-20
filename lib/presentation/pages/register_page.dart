@@ -18,15 +18,13 @@ Also, if user already has an account, they can go to page from here.
 
 */
 
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_button.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_loading.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_textfield.dart';
 import 'package:flutter_twitter_clone/navigation/go_router.dart';
 import 'package:flutter_twitter_clone/presentation/provider/auth_provider.dart';
-import 'package:flutter_twitter_clone/presentation/provider/firestore_provider.dart';
+import 'package:flutter_twitter_clone/presentation/provider/database_provider.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -49,7 +47,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthenticationProvider>(context);
-    final firestoreProvider = Provider.of<FirestoreProvider>(context);
+    final firestoreProvider = Provider.of<DatabaseProvider>(context);
 
     //register
     void register() async {

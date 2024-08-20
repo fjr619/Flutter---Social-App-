@@ -1,11 +1,10 @@
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/di/get_it.dart';
 import 'package:flutter_twitter_clone/firebase_options.dart';
 import 'package:flutter_twitter_clone/navigation/go_router.dart';
 import 'package:flutter_twitter_clone/presentation/provider/auth_provider.dart';
-import 'package:flutter_twitter_clone/presentation/provider/firestore_provider.dart';
+import 'package:flutter_twitter_clone/presentation/provider/database_provider.dart';
 import 'package:flutter_twitter_clone/presentation/provider/theme_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +17,7 @@ void main() async {
     ChangeNotifierProvider(create: (context) => ThemeProvider()),
     ChangeNotifierProvider(create: (context) => AuthenticationProvider()),
     ChangeNotifierProvider(
-      create: (context) => FirestoreProvider(),
+      create: (context) => DatabaseProvider(),
     ),
     router()
   ], child: const MyApp()));

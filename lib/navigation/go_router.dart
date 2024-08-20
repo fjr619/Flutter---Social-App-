@@ -1,10 +1,13 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/presentation/pages/home_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/login_page.dart';
+import 'package:flutter_twitter_clone/presentation/pages/profile_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/register_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/settings_page.dart';
 import 'package:flutter_twitter_clone/presentation/provider/auth_provider.dart';
-import 'package:flutter_twitter_clone/presentation/provider/firestore_provider.dart';
+import 'package:flutter_twitter_clone/presentation/provider/database_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -13,6 +16,7 @@ class AppRoute {
   static const String settings = "Settings";
   static const String login = "Login";
   static const String register = "Register";
+  static const String profile = "Profile";
 }
 
 Provider<GoRouter> router() {
@@ -22,8 +26,8 @@ Provider<GoRouter> router() {
     create: (context) {
       AuthenticationProvider authProvider =
           Provider.of<AuthenticationProvider>(context, listen: false);
-      FirestoreProvider firestoreProvider =
-          Provider.of<FirestoreProvider>(context, listen: false);
+      DatabaseProvider firestoreProvider =
+          Provider.of<DatabaseProvider>(context, listen: false);
 
       return GoRouter(
         refreshListenable: Listenable.merge([
@@ -84,6 +88,18 @@ Provider<GoRouter> router() {
               child: const RegisterPage(),
             ),
           ),
+          GoRoute(
+              name: AppRoute.profile,
+              path: '/profile/:uid',
+              pageBuilder: (context, state) {
+                final uid = state.pathParameters["uid"]!;
+                return buildTransitionpage(
+                  key: state.pageKey,
+                  child: ProfilePage(
+                    uid: uid,
+                  ),
+                );
+              })
         ],
       );
     },
