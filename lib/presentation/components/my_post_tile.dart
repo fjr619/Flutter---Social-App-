@@ -9,6 +9,8 @@
   To use this widget, you need:
 
   - post
+  - function for onPostTap
+  - function for onUserTap
 
 */
 
@@ -18,8 +20,9 @@ import 'package:gap/gap.dart';
 
 class MyPostTile extends StatelessWidget {
   final Post post;
+  final Function() onUserTap;
 
-  const MyPostTile({super.key, required this.post});
+  const MyPostTile({super.key, required this.post, required this.onUserTap});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +31,7 @@ class MyPostTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
 
       //padding inside
-      padding: const EdgeInsets.all(20),
+      // padding: const EdgeInsets.all(20),
 
       //box decoration
       decoration: BoxDecoration(
@@ -41,42 +44,61 @@ class MyPostTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           //top section profile pic / name / username
-          Row(
-            children: [
-              // profile pic
-              Icon(
-                Icons.person,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+          Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                customBorder: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4)),
+                onTap: onUserTap,
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // profile pic
+                      Icon(
+                        Icons.person,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
 
-              const Gap(10),
+                      const Gap(10),
 
-              // profile name
-              Text(
-                post.name,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold,
+                      // profile name
+                      Text(
+                        post.name,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const Gap(5),
+
+                      // profile username
+                      Text(
+                        '@${post.username}',
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary),
+                      )
+                    ],
+                  ),
                 ),
               ),
-
-              const Gap(5),
-
-              // profile username
-              Text(
-                '@${post.username}',
-                style: TextStyle(color: Theme.of(context).colorScheme.primary),
-              )
-            ],
+            ),
           ),
 
-          const Gap(20),
+          const Gap(10),
 
           //message
-          Text(
-            post.message,
-            style:
-                TextStyle(color: Theme.of(context).colorScheme.inversePrimary),
+          Padding(
+            padding: const EdgeInsets.only(left: 18, right: 18, bottom: 20),
+            child: Text(
+              post.message,
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.inversePrimary),
+            ),
           )
         ],
       ),

@@ -93,9 +93,8 @@ class _HomePageState extends State<HomePage> {
         onClickProfile: () {
           log('uid ${context.read<AuthenticationProvider>().currentUser?.uid}');
           context.pop();
-          context.pushNamed(AppRoute.profile, pathParameters: {
-            'uid': context.read<AuthenticationProvider>().currentUser!.uid
-          });
+          goUserPage(
+              context, context.read<AuthenticationProvider>().currentUser!.uid);
         },
         onClickSettings: () {
           context.pop();
@@ -139,7 +138,13 @@ class _HomePageState extends State<HomePage> {
                       itemCount: data.length,
                       itemBuilder: (context, index) {
                         final post = data[index];
-                        return MyPostTile(post: post);
+                        return MyPostTile(
+                          post: post,
+                          onUserTap: () {
+                            goUserPage(context, post.uid);
+                            // context.pushNamed(AppRoute.settings);
+                          },
+                        );
                       },
                     );
                   });

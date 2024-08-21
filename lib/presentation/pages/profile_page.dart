@@ -1,7 +1,9 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_twitter_clone/di/get_it.dart';
 import 'package:flutter_twitter_clone/domain/model/post.dart';
+import 'package:flutter_twitter_clone/navigation/go_router.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_bio_box.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_input_alert_box.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_post_tile.dart';
@@ -9,31 +11,56 @@ import 'package:flutter_twitter_clone/presentation/provider/database_provider.da
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends StatelessWidget {
   final String uid;
 
   const ProfilePage({super.key, required this.uid});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) => getIt<DatabaseProvider>(),
+      child: ProfilePageContent(
+        uid: uid,
+      ),
+    );
+  }
 }
 
-class _ProfilePageState extends State<ProfilePage> {
-  late final databaseProvider =
-      Provider.of<DatabaseProvider>(context, listen: false);
+class ProfilePageContent extends StatefulWidget {
+  final String uid;
 
-  //text controller for bio
+  const ProfilePageContent({super.key, required this.uid});
+
+  @override
+  State<ProfilePageContent> createState() => _ProfilePageContentState();
+}
+
+class _ProfilePageContentState extends State<ProfilePageContent> {
+  late final DatabaseProvider databaseProvider =
+      Provider.of(context, listen: false);
+  late final DatabaseProvider listenDatabaseProvider = Provider.of(context);
+  late Future<List<Post>> _postFuture;
   final bioController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     loadUser();
+    _postFuture = databaseProvider.getUserPosts(widget.uid);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    log('profile page dispose');
   }
 
   void loadUser() async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
+        final databaseProvider =
+            Provider.of<DatabaseProvider>(context, listen: false);
         databaseProvider.showDialog();
         await databaseProvider.getUserProfile(widget.uid);
       } finally {
@@ -42,7 +69,7 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  // show edit bio box
+  // // show edit bio box
   void _showEditBioBox() {
     showDialog(
         context: context,
@@ -53,7 +80,7 @@ class _ProfilePageState extends State<ProfilePage> {
             onPressedText: 'Save'));
   }
 
-  // save user bio
+  // // save user bio
   Future<void> saveBio() async {
     databaseProvider.showDialog();
     await databaseProvider.updateUserBio(bioController.text);
@@ -67,9 +94,9 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
-        title: Text(databaseProvider.isLoading
+        title: Text(listenDatabaseProvider.isLoading
             ? ''
-            : databaseProvider.userProfile?.name ?? 'User Profile'),
+            : listenDatabaseProvider.userProfile?.name ?? 'User Profile'),
         foregroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: ListView(
@@ -77,9 +104,9 @@ class _ProfilePageState extends State<ProfilePage> {
           //username handle
           Center(
             child: Text(
-              databaseProvider.isLoading
+              listenDatabaseProvider.isLoading
                   ? ''
-                  : '@${databaseProvider.userProfile?.username ?? ''}',
+                  : '@${listenDatabaseProvider.userProfile?.username ?? ''}',
               style: TextStyle(color: Theme.of(context).colorScheme.primary),
             ),
           ),
@@ -135,9 +162,9 @@ class _ProfilePageState extends State<ProfilePage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: MyBioBox(
-                text: (databaseProvider.isLoading)
+                text: (listenDatabaseProvider.isLoading)
                     ? '...'
-                    : databaseProvider.userProfile?.bio ?? 'Empty bio'),
+                    : listenDatabaseProvider.userProfile?.bio ?? 'Empty bio'),
           ),
 
           Padding(
@@ -155,7 +182,7 @@ class _ProfilePageState extends State<ProfilePage> {
           Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: FutureBuilder<List<Post>>(
-              future: databaseProvider.getUserPosts(widget.uid),
+              future: _postFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -172,7 +199,13 @@ class _ProfilePageState extends State<ProfilePage> {
                     shrinkWrap: true,
                     itemCount: posts.length,
                     itemBuilder: (context, index) {
-                      return MyPostTile(post: posts[index]);
+                      final post = posts[index];
+                      return MyPostTile(
+                        post: post,
+                        onUserTap: () {
+                          goUserPage(context, post.uid);
+                        },
+                      );
                     },
                   );
                 }

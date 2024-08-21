@@ -47,8 +47,6 @@ class DatabaseProvider extends ChangeNotifier {
     _isSaveUserProfile = false;
     showDialog();
 
-    await Future.delayed(const Duration(seconds: 2));
-
     final result =
         await databaseRepository.saveUserProfile(name: name, email: email);
     result.fold((failure) {}, (unit) {});
@@ -113,6 +111,7 @@ class DatabaseProvider extends ChangeNotifier {
   }
 
   Future<List<Post>> getUserPosts(String uid) async {
+    log('getUserPosts start');
     final result = await databaseRepository.getPostsUID(uid);
 
     return result.fold(
@@ -125,5 +124,11 @@ class DatabaseProvider extends ChangeNotifier {
         return posts; // Return the list of posts
       },
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    log('[rpvoder dispose]');
   }
 }

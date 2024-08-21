@@ -121,3 +121,7 @@ CustomTransitionPage buildTransitionpage<T>({
     },
   );
 }
+
+void goUserPage(BuildContext context, String uid) {
+  context.pushNamed(AppRoute.profile, pathParameters: {'uid': uid});
+}
