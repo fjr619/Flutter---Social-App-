@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eitherx/eitherx.dart';
 import 'package:flutter_twitter_clone/di/get_it.dart';
 import 'package:flutter_twitter_clone/domain/model/failure.dart';
+import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/domain/model/user_profile.dart';
 import 'package:flutter_twitter_clone/domain/repository/auth_repository.dart';
 import 'package:flutter_twitter_clone/domain/repository/database_repository.dart';
@@ -73,6 +74,8 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
 
       // convert doc to user profile
       return Right(UserProfile.fromDocument(userDoc));
+    } on FirebaseException catch (e) {
+      return Left(ServerFailure("Error getUserProfile ${e.code}"));
     } catch (e) {
       return const Left(ServerFailure("Error getUserProfile"));
     }
@@ -92,7 +95,64 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     }
   }
 
-  /**
-   * 
-   */
+  /// POST MESSAGE
+
+  // Post a message
+  @override
+  Future<Either<Failure, Unit>> postMessage(String message) async {
+    try {
+      String uid = _auth.currentUser!.uid;
+
+      final resultUser = await getUserProfile(uid);
+
+      if (resultUser.isLeft) {
+        return Left(resultUser.leftOrNull()!);
+      } else if (resultUser.isRight) {
+        UserProfile? user = resultUser.rightOrNull();
+        Post newPost = Post(
+          id: '',
+          uid: uid,
+          name: user!.name,
+          username: user.username,
+          message: message,
+          timestamp: Timestamp.now(),
+          likeCount: 0,
+          likedBy: [],
+        );
+
+        // convert post object to map
+        await _db.collection('Posts').add(newPost.toMap());
+        return const Right(unit);
+      }
+
+      return const Left(ServerFailure("Error getUserProfile"));
+    } on FirebaseException catch (e) {
+      return Left(ServerFailure("Error getUserProfile ${e.code}"));
+    } catch (e) {
+      return const Left(ServerFailure("Error getUserProfile"));
+    }
+  }
+
+  // Delete a message
+  // Get all posts from firebase
+  @override
+  Stream<Either<Failure, List<Post>>> getAllPosts() {
+    try {
+      return _db
+          .collection('Posts')
+          .orderBy('timestamp', descending: true)
+          .snapshots()
+          .map<Either<Failure, List<Post>>>((snapshot) {
+        final posts =
+            snapshot.docs.map((doc) => Post.fromDocument(doc)).toList();
+        return Right(posts);
+      }).handleError((error) {
+        return Left(ServerFailure('Failed to fetch posts: $error'));
+      });
+    } catch (e) {
+      return Stream.value(Left(ServerFailure('Failed to fetch posts: $e')));
+    }
+  }
 }
+
+  // Get individuaal post

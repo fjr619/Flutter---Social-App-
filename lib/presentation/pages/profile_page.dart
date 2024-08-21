@@ -15,25 +15,27 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  late final databaseProvider =
+      Provider.of<DatabaseProvider>(context, listen: false);
+
   //text controller for bio
   final bioController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    context.read<DatabaseProvider>().showDialog();
     loadUser();
   }
 
   void loadUser() async {
-    // Fetch data when the widget is first created
-    // WidgetsBinding.instance.addPostFrameCallback((_) async {
-    //   await context.read<DatabaseProvider>().getUserProfile(widget.uid);
-    //   context.read<DatabaseProvider>().hideDialog();
-    // });
-
-    await context.read<DatabaseProvider>().getUserProfile(widget.uid);
-    if (mounted) context.read<DatabaseProvider>().hideDialog();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        databaseProvider.showDialog();
+        await databaseProvider.getUserProfile(widget.uid);
+      } finally {
+        databaseProvider.hideDialog();
+      }
+    });
   }
 
   // show edit bio box
@@ -63,7 +65,7 @@ class _ProfilePageState extends State<ProfilePage> {
         centerTitle: true,
         title: Text(databaseProvider.isLoading
             ? ''
-            : databaseProvider.userProfile!.name),
+            : databaseProvider.userProfile?.name ?? 'User Profile'),
         foregroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Padding(
@@ -75,7 +77,7 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Text(
                 databaseProvider.isLoading
                     ? ''
-                    : '@${databaseProvider.userProfile!.username}',
+                    : '@${databaseProvider.userProfile?.username ?? ''}',
                 style: TextStyle(color: Theme.of(context).colorScheme.primary),
               ),
             ),
@@ -130,7 +132,7 @@ class _ProfilePageState extends State<ProfilePage> {
             MyBioBox(
                 text: (databaseProvider.isLoading)
                     ? '...'
-                    : databaseProvider.userProfile!.bio),
+                    : databaseProvider.userProfile?.bio ?? 'Empty bio'),
 
             //list of post from user
           ],

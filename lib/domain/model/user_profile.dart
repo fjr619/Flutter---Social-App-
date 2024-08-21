@@ -57,4 +57,20 @@ class UserProfile {
       'bio': bio,
     };
   }
+
+  UserProfile copyWith({
+    String? uid,
+    String? name,
+    String? email,
+    String? username,
+    String? bio,
+  }) {
+    return UserProfile(
+      uid: uid ?? this.uid,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      username: username ?? this.username,
+      bio: bio ?? this.bio,
+    );
+  }
 }

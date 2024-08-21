@@ -1,7 +1,10 @@
 import 'dart:developer';
 
+import 'package:eitherx/eitherx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/di/get_it.dart';
+import 'package:flutter_twitter_clone/domain/model/failure.dart';
+import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/domain/model/user_profile.dart';
 import 'package:flutter_twitter_clone/domain/repository/database_repository.dart';
 
@@ -81,8 +84,10 @@ class DatabaseProvider extends ChangeNotifier {
       },
     );
 
+    log("user ${userProfile?.name}");
+
     // _isLoading = false;
-    // notifyListeners();
+    notifyListeners();
   }
 
   Future<void> updateUserBio(String bio) async {
@@ -93,5 +98,21 @@ class DatabaseProvider extends ChangeNotifier {
       },
       (data) {},
     );
+  }
+
+  /*
+    POSTS
+  */
+
+  // local list of posts
+  // final List<Post> _allPosts = [];
+  // List<Post> get allPOst => _allPosts;
+
+  Future<void> postMessage(String message) async {
+    await databaseRepository.postMessage(message);
+  }
+
+  Stream<Either<Failure, List<Post>>> loadAllPosts() {
+    return databaseRepository.getAllPosts();
   }
 }

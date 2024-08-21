@@ -1,5 +1,6 @@
 import 'package:eitherx/eitherx.dart';
 import 'package:flutter_twitter_clone/domain/model/failure.dart';
+import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/domain/model/user_profile.dart';
 
 abstract class DatabaseRepository {
@@ -7,4 +8,6 @@ abstract class DatabaseRepository {
       {required String name, required String email});
   Future<Either<Failure, UserProfile?>> getUserProfile(String uid);
   Future<Either<Failure, Unit>> updateUserBio(String bio);
+  Future<Either<Failure, Unit>> postMessage(String message);
+  Stream<Either<Failure, List<Post>>> getAllPosts();
 }
