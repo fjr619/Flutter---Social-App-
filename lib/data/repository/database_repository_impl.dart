@@ -153,6 +153,20 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
       return Stream.value(Left(ServerFailure('Failed to fetch posts: $e')));
     }
   }
-}
 
   // Get individuaal post
+  @override
+  Future<Either<Failure, List<Post>>> getPostsUID(String uid) async {
+    try {
+      QuerySnapshot snapshot = await _db
+          .collection('Posts')
+          .where('uid', isEqualTo: uid)
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      return Right(snapshot.docs.map((doc) => Post.fromDocument(doc)).toList());
+    } catch (e) {
+      return Left(ServerFailure('Failed to fetch posts: $e'));
+    }
+  }
+}

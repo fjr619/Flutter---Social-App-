@@ -104,15 +104,26 @@ class DatabaseProvider extends ChangeNotifier {
     POSTS
   */
 
-  // local list of posts
-  // final List<Post> _allPosts = [];
-  // List<Post> get allPOst => _allPosts;
-
   Future<void> postMessage(String message) async {
     await databaseRepository.postMessage(message);
   }
 
   Stream<Either<Failure, List<Post>>> loadAllPosts() {
     return databaseRepository.getAllPosts();
+  }
+
+  Future<List<Post>> getUserPosts(String uid) async {
+    final result = await databaseRepository.getPostsUID(uid);
+
+    return result.fold(
+      (failure) {
+        // You can either handle the failure here or throw an exception
+        throw Exception(failure.message);
+        // return []; // Alternatively, return an empty list instead of throwing an error
+      },
+      (posts) {
+        return posts; // Return the list of posts
+      },
+    );
   }
 }
