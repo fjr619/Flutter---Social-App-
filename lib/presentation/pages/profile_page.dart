@@ -198,6 +198,11 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
                           );
                         }, (data) {
                           log('data ${data.length}');
+                          if (data.isEmpty) {
+                            return const Center(
+                              child: Text('Nothing here'),
+                            );
+                          }
                           return ListView.builder(
                             physics: const NeverScrollableScrollPhysics(),
                             shrinkWrap: true,
@@ -215,35 +220,6 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
                 }
               },
             ),
-            // child: FutureBuilder<List<Post>>(
-            //   future: _postFuture,
-            //   builder: (context, snapshot) {
-            //     if (snapshot.connectionState == ConnectionState.waiting) {
-            //       return const Center(child: CircularProgressIndicator());
-            //     } else if (snapshot.hasError) {
-            //       return Center(child: Text('Error: ${snapshot.error}'));
-            //     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            //       return const Center(child: Text('No posts found'));
-            //     } else {
-            //       final posts = snapshot.data!;
-            //       log("data ${posts.length}");
-
-            //       return ListView.builder(
-            //         physics: const NeverScrollableScrollPhysics(),
-            //         shrinkWrap: true,
-            //         itemCount: posts.length,
-            //         itemBuilder: (context, index) {
-            //           final post = posts[index];
-            //           return MyPostTile(
-            //             post: post,
-            //             onUserTap: null,
-            //             onPostTap: () => goPostPage(context, post),
-            //           );
-            //         },
-            //       );
-            //     }
-            //   },
-            // ),
           )
         ],
       ),

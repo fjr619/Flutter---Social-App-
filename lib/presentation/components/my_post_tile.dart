@@ -14,6 +14,8 @@
 
 */
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/presentation/provider/auth_provider.dart';
@@ -124,6 +126,7 @@ class MyPostTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    log('like count ${post.likeCount}}');
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: InkWell(
@@ -192,12 +195,54 @@ class MyPostTile extends StatelessWidget {
 
               //message
               Padding(
-                padding: const EdgeInsets.only(left: 18, right: 18, bottom: 16),
+                padding: const EdgeInsets.only(left: 18, right: 18),
                 child: Text(
                   post.message,
                   style: TextStyle(
                       color: Theme.of(context).colorScheme.inversePrimary),
                 ),
+              ),
+
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      await context.read<DatabaseProvider>().likePost(post.id);
+                    },
+                    icon: AnimatedCrossFade(
+                      firstChild: Icon(
+                        Icons.favorite_border,
+                        color: Theme.of(context).colorScheme.primary,
+                        key: const ValueKey('notLiked'),
+                      ),
+                      secondChild: Icon(
+                        Icons.favorite,
+                        color: Theme.of(context).colorScheme.inversePrimary,
+                        key: const ValueKey('liked'),
+                      ),
+                      crossFadeState: post.likedBy.contains(context
+                              .watch<AuthenticationProvider>()
+                              .currentUser!
+                              .uid)
+                          ? CrossFadeState.showSecond
+                          : CrossFadeState.showFirst,
+                      layoutBuilder:
+                          (topChild, topChildKey, bottomChild, bottomChildKey) {
+                        return Stack(
+                          clipBehavior: Clip.none,
+                          children: <Widget>[
+                            Positioned(key: bottomChildKey, child: bottomChild),
+                            Positioned(key: topChildKey, child: topChild),
+                          ],
+                        );
+                      },
+                      duration: const Duration(milliseconds: 400),
+                    ),
+                  ),
+                  Text(context
+                      .watch<DatabaseProvider>()
+                      .formatNumber(post.likeCount)),
+                ],
               )
             ],
           ),

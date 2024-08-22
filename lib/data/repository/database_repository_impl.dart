@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eitherx/eitherx.dart';
 import 'package:flutter_twitter_clone/di/get_it.dart';
@@ -27,7 +29,14 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   final _db = getIt<FirebaseFirestore>();
   final _auth = getIt<AuthRepository>();
 
-  /* user profile
+  DatabaseRepositoryImpl() {
+    _db.settings = const Settings(
+      persistenceEnabled: true,
+    );
+  }
+
+  /* 
+   * USER PROFILE
    *
    * when a new user registers, we create an account for then,
    * but let's also store their details in the database to display on their profile page
@@ -95,7 +104,9 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     }
   }
 
-  /// POST MESSAGE
+  /*
+    MESSAGE
+  */
 
   // Post a message
   @override
@@ -184,6 +195,73 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
       });
     } catch (e) {
       return Stream.value(Left(ServerFailure('Failed to fetch posts: $e')));
+    }
+  }
+
+  /*
+    LIKES
+  */
+
+  // like a post
+  @override
+  Future<Either<Failure, Unit>> toggleLikeInFirebase(String postId) async {
+    try {
+      log('toggleLikeInFirebase');
+
+      //get current uid
+      String uid = _auth.currentUser!.uid;
+
+      //go to doc for this post
+      DocumentReference postDoc = _db.collection('Posts').doc(postId);
+
+      //execute like
+      await _db.runTransaction(
+        (transaction) async {
+          // get post data
+          DocumentSnapshot postSnapshot = await transaction.get(postDoc);
+
+          // get like of users who like the post
+          List<String> likedBy =
+              List<String>.from(postSnapshot['likedBy'] ?? []);
+
+          // get like count
+          int currentLikeCount = postSnapshot['likeCount'];
+
+          // if user has not liked this post yet -> then like
+          if (!likedBy.contains(uid)) {
+            // add user to like list
+            likedBy.add(uid);
+            currentLikeCount++;
+          }
+
+          // if user has already liked this post -> then unlike
+          else {
+            // remove user from like list
+            likedBy.remove(uid);
+
+            // decrement like count
+            currentLikeCount--;
+          }
+
+          // update firebase
+          log('likeCount $currentLikeCount');
+          log('likedby ${likedBy.length}');
+          transaction.update(
+            postDoc,
+            {
+              'likeCount': currentLikeCount,
+              'likedBy': likedBy,
+            },
+          );
+        },
+      );
+      return const Right(unit);
+    } on FirebaseException catch (e) {
+      log("error ${e.code}");
+      return Left(ServerFailure("Error getUserProfile ${e.code}"));
+    } catch (e) {
+      log("error $e");
+      return const Left(ServerFailure("Error getUserProfile"));
     }
   }
 }

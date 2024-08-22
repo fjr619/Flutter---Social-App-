@@ -122,6 +122,11 @@ class _HomePageState extends State<HomePage> {
                       child: Text('Error here ${failure.message}'),
                     );
                   }, (data) {
+                    if (data.isEmpty) {
+                      return const Center(
+                        child: Text('Nothing here'),
+                      );
+                    }
                     return ListView.builder(
                       itemCount: data.length,
                       itemBuilder: (context, index) {
