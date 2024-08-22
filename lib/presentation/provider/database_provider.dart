@@ -110,20 +110,12 @@ class DatabaseProvider extends ChangeNotifier {
     return databaseRepository.getAllPosts();
   }
 
-  Future<List<Post>> getUserPosts(String uid) async {
-    log('getUserPosts start');
-    final result = await databaseRepository.getPostsUID(uid);
+  Stream<Either<Failure, List<Post>>> getUserPosts(String uid) {
+    return databaseRepository.getPostsUID(uid);
+  }
 
-    return result.fold(
-      (failure) {
-        // You can either handle the failure here or throw an exception
-        throw Exception(failure.message);
-        // return []; // Alternatively, return an empty list instead of throwing an error
-      },
-      (posts) {
-        return posts; // Return the list of posts
-      },
-    );
+  Future<void> deletePost(String postId) async {
+    await databaseRepository.deletePost(postId);
   }
 
   @override

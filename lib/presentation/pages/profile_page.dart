@@ -19,7 +19,7 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => getIt<DatabaseProvider>(),
+      create: (context) => DatabaseProvider(),
       child: ProfilePageContent(
         uid: uid,
       ),
@@ -40,14 +40,12 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
   late final DatabaseProvider databaseProvider =
       Provider.of(context, listen: false);
   late final DatabaseProvider listenDatabaseProvider = Provider.of(context);
-  late Future<List<Post>> _postFuture;
   final bioController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     loadUser();
-    _postFuture = databaseProvider.getUserPosts(widget.uid);
   }
 
   @override
@@ -181,36 +179,71 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
           //list of post from user
           Padding(
             padding: const EdgeInsets.only(bottom: 16),
-            child: FutureBuilder<List<Post>>(
-              future: _postFuture,
+            child: StreamBuilder(
+              stream:
+                  context.watch<DatabaseProvider>().getUserPosts(widget.uid),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No posts found'));
-                } else {
-                  final posts = snapshot.data!;
-                  log("data ${posts.length}");
-
-                  return ListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: posts.length,
-                    itemBuilder: (context, index) {
-                      final post = posts[index];
-                      return MyPostTile(
-                        post: post,
-                        onUserTap: () {
-                          goUserPage(context, post.uid);
-                        },
-                      );
-                    },
+                  return const Center(
+                    child: CircularProgressIndicator(),
                   );
+                } else {
+                  return !snapshot.hasData
+                      ? const Center(
+                          child: Text('Nothing here'),
+                        )
+                      : snapshot.data!.fold((failure) {
+                          return Center(
+                            child: Text('Error here ${failure.message}'),
+                          );
+                        }, (data) {
+                          log('data ${data.length}');
+                          return ListView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: data.length,
+                            itemBuilder: (context, index) {
+                              final post = data[index];
+                              return MyPostTile(
+                                post: post,
+                                onUserTap: () => goUserPage(context, post.uid),
+                                onPostTap: () => goPostPage(context, post),
+                              );
+                            },
+                          );
+                        });
                 }
               },
             ),
+            // child: FutureBuilder<List<Post>>(
+            //   future: _postFuture,
+            //   builder: (context, snapshot) {
+            //     if (snapshot.connectionState == ConnectionState.waiting) {
+            //       return const Center(child: CircularProgressIndicator());
+            //     } else if (snapshot.hasError) {
+            //       return Center(child: Text('Error: ${snapshot.error}'));
+            //     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            //       return const Center(child: Text('No posts found'));
+            //     } else {
+            //       final posts = snapshot.data!;
+            //       log("data ${posts.length}");
+
+            //       return ListView.builder(
+            //         physics: const NeverScrollableScrollPhysics(),
+            //         shrinkWrap: true,
+            //         itemCount: posts.length,
+            //         itemBuilder: (context, index) {
+            //           final post = posts[index];
+            //           return MyPostTile(
+            //             post: post,
+            //             onUserTap: null,
+            //             onPostTap: () => goPostPage(context, post),
+            //           );
+            //         },
+            //       );
+            //     }
+            //   },
+            // ),
           )
         ],
       ),

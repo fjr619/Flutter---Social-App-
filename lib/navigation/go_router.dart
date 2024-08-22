@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/presentation/pages/home_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/login_page.dart';
+import 'package:flutter_twitter_clone/presentation/pages/post_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/profile_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/register_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/settings_page.dart';
@@ -15,6 +17,7 @@ class AppRoute {
   static const String login = "Login";
   static const String register = "Register";
   static const String profile = "Profile";
+  static const String post = "Post";
 }
 
 Provider<GoRouter> router() {
@@ -54,6 +57,7 @@ Provider<GoRouter> router() {
           return null; // Tetap di halaman yang diminta
         },
         routes: [
+          //home
           GoRoute(
             name: AppRoute.home,
             path: '/home',
@@ -62,6 +66,8 @@ Provider<GoRouter> router() {
               child: const HomePage(),
             ),
           ),
+
+          //settings
           GoRoute(
             name: AppRoute.settings,
             path: '/settings',
@@ -70,6 +76,8 @@ Provider<GoRouter> router() {
               child: const SettingsPage(),
             ),
           ),
+
+          //login
           GoRoute(
             name: AppRoute.login,
             path: '/login',
@@ -78,6 +86,8 @@ Provider<GoRouter> router() {
               child: const LoginPage(),
             ),
           ),
+
+          //register
           GoRoute(
             name: AppRoute.register,
             path: '/register',
@@ -86,18 +96,34 @@ Provider<GoRouter> router() {
               child: const RegisterPage(),
             ),
           ),
+
+          //profile
           GoRoute(
-              name: AppRoute.profile,
-              path: '/profile/:uid',
-              pageBuilder: (context, state) {
-                final uid = state.pathParameters["uid"]!;
-                return buildTransitionpage(
-                  key: state.pageKey,
-                  child: ProfilePage(
-                    uid: uid,
-                  ),
-                );
-              })
+            name: AppRoute.profile,
+            path: '/profile/:uid',
+            pageBuilder: (context, state) {
+              final uid = state.pathParameters["uid"]!;
+              return buildTransitionpage(
+                key: state.pageKey,
+                child: ProfilePage(
+                  uid: uid,
+                ),
+              );
+            },
+          ),
+
+          //post
+          GoRoute(
+            name: AppRoute.post,
+            path: '/post',
+            pageBuilder: (context, state) {
+              final post = state.extra! as Post;
+              return buildTransitionpage(
+                key: state.pageKey,
+                child: PostPage(post: post),
+              );
+            },
+          ),
         ],
       );
     },
@@ -124,4 +150,8 @@ CustomTransitionPage buildTransitionpage<T>({
 
 void goUserPage(BuildContext context, String uid) {
   context.pushNamed(AppRoute.profile, pathParameters: {'uid': uid});
+}
+
+void goPostPage(BuildContext context, Post post) {
+  context.pushNamed(AppRoute.post, extra: post);
 }

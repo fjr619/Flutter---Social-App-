@@ -49,41 +49,28 @@ class _HomePageState extends State<HomePage> {
     await context.read<DatabaseProvider>().postMessage(message);
   }
 
-  // //load all posts
-  // Future<void> loadAllPosts() async {
-  //   context.read<DatabaseProvider>().loadAllPosts();
-  // }
+  //logout
+  void logout() async {
+    //show loading
+    showLoadingCircle(context);
 
-  //on startup
-  @override
-  void initState() {
-    super.initState();
+    try {
+      // trying to login
+      await context.read<AuthenticationProvider>().logout();
 
-    // // let's load all posts
-    // loadAllPosts();
+      // finished loading
+      if (mounted) hideLoadingCircle(context);
+
+      // catch any errors
+    } catch (e) {
+      // finished loading
+      if (mounted) hideLoadingCircle(context);
+      log("error $e");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    void logout() async {
-      //show loading
-      showLoadingCircle(context);
-
-      try {
-        // trying to login
-        await context.read<AuthenticationProvider>().logout();
-
-        // finished loading
-        if (context.mounted) hideLoadingCircle(context);
-
-        // catch any errors
-      } catch (e) {
-        // finished loading
-        if (context.mounted) hideLoadingCircle(context);
-        log("error $e");
-      }
-    }
-
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
 
@@ -105,6 +92,7 @@ class _HomePageState extends State<HomePage> {
 
       //appbar
       appBar: AppBar(
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
         title: const Text('H O M E'),
         foregroundColor: Theme.of(context).colorScheme.primary,
@@ -140,10 +128,8 @@ class _HomePageState extends State<HomePage> {
                         final post = data[index];
                         return MyPostTile(
                           post: post,
-                          onUserTap: () {
-                            goUserPage(context, post.uid);
-                            // context.pushNamed(AppRoute.settings);
-                          },
+                          onUserTap: () => goUserPage(context, post.uid),
+                          onPostTap: () => goPostPage(context, post),
                         );
                       },
                     );

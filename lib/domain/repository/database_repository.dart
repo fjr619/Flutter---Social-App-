@@ -10,5 +10,6 @@ abstract class DatabaseRepository {
   Future<Either<Failure, Unit>> updateUserBio(String bio);
   Future<Either<Failure, Unit>> postMessage(String message);
   Stream<Either<Failure, List<Post>>> getAllPosts();
-  Future<Either<Failure, List<Post>>> getPostsUID(String uid);
+  Stream<Either<Failure, List<Post>>> getPostsUID(String uid);
+  Future<Either<Failure, Unit>> deletePost(String postId);
 }

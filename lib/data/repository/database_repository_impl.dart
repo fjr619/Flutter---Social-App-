@@ -134,6 +134,18 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   }
 
   // Delete a message
+  @override
+  Future<Either<Failure, Unit>> deletePost(String postId) async {
+    try {
+      await _db.collection('Posts').doc(postId).delete();
+      return const Right(unit);
+    } on FirebaseException catch (e) {
+      return Left(ServerFailure("Error getUserProfile ${e.code}"));
+    } catch (e) {
+      return const Left(ServerFailure("Error getUserProfile"));
+    }
+  }
+
   // Get all posts from firebase
   @override
   Stream<Either<Failure, List<Post>>> getAllPosts() {
@@ -156,17 +168,22 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
 
   // Get individuaal post
   @override
-  Future<Either<Failure, List<Post>>> getPostsUID(String uid) async {
+  Stream<Either<Failure, List<Post>>> getPostsUID(String uid) {
     try {
-      QuerySnapshot snapshot = await _db
+      return _db
           .collection('Posts')
           .where('uid', isEqualTo: uid)
           .orderBy('timestamp', descending: true)
-          .get();
-
-      return Right(snapshot.docs.map((doc) => Post.fromDocument(doc)).toList());
+          .snapshots()
+          .map<Either<Failure, List<Post>>>((snapshot) {
+        final posts =
+            snapshot.docs.map((doc) => Post.fromDocument(doc)).toList();
+        return Right(posts);
+      }).handleError((error) {
+        return Left(ServerFailure('Failed to fetch posts: $error'));
+      });
     } catch (e) {
-      return Left(ServerFailure('Failed to fetch posts: $e'));
+      return Stream.value(Left(ServerFailure('Failed to fetch posts: $e')));
     }
   }
 }
