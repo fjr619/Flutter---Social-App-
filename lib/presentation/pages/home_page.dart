@@ -1,6 +1,9 @@
 import 'dart:developer';
 
+import 'package:eitherx/eitherx.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_twitter_clone/domain/model/failure.dart';
+import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_drawer.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_input_alert_box.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_loading.dart';
@@ -27,8 +30,23 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late final DatabaseProvider databaseProvider =
+      Provider.of(context, listen: false);
+  late Stream<Either<Failure, List<Post>>> _stream;
   //text controller
   final _messageController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _stream = databaseProvider.loadAllPosts();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _messageController.dispose();
+  }
 
   //show post message dialog box
   void _openPostMessageBox() {
@@ -78,7 +96,6 @@ class _HomePageState extends State<HomePage> {
       drawer: MyDrawer(
         onClickHome: () => context.pop(),
         onClickProfile: () {
-          log('uid ${context.read<AuthenticationProvider>().currentUser?.uid}');
           context.pop();
           goUserPage(
               context, context.read<AuthenticationProvider>().currentUser!.uid);
@@ -106,7 +123,7 @@ class _HomePageState extends State<HomePage> {
 
       //body
       body: StreamBuilder(
-        stream: context.watch<DatabaseProvider>().loadAllPosts(),
+        stream: _stream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(

@@ -1,7 +1,9 @@
 import 'dart:developer';
 
+import 'package:eitherx/eitherx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/di/get_it.dart';
+import 'package:flutter_twitter_clone/domain/model/failure.dart';
 import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/navigation/go_router.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_bio_box.dart';
@@ -41,16 +43,19 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
       Provider.of(context, listen: false);
   late final DatabaseProvider listenDatabaseProvider = Provider.of(context);
   final bioController = TextEditingController();
+  late Stream<Either<Failure, List<Post>>> _stream;
 
   @override
   void initState() {
     super.initState();
+    _stream = databaseProvider.getUserPosts(widget.uid);
     loadUser();
   }
 
   @override
   void dispose() {
     super.dispose();
+    bioController.dispose;
     log('profile page dispose');
   }
 
@@ -180,8 +185,7 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
           Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: StreamBuilder(
-              stream:
-                  context.watch<DatabaseProvider>().getUserPosts(widget.uid),
+              stream: _stream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
