@@ -129,34 +129,41 @@ class _HomePageState extends State<HomePage> {
             return const Center(
               child: CircularProgressIndicator(),
             );
-          } else {
-            return !snapshot.hasData
-                ? const Center(
-                    child: Text('Nothing here'),
-                  )
-                : snapshot.data!.fold((failure) {
-                    return Center(
-                      child: Text('Error here ${failure.message}'),
-                    );
-                  }, (data) {
-                    if (data.isEmpty) {
-                      return const Center(
-                        child: Text('Nothing here'),
-                      );
-                    }
-                    return ListView.builder(
-                      itemCount: data.length,
-                      itemBuilder: (context, index) {
-                        final post = data[index];
-                        return MyPostTile(
-                          post: post,
-                          onUserTap: () => goUserPage(context, post.uid),
-                          onPostTap: () => goPostPage(context, post),
-                        );
-                      },
-                    );
-                  });
           }
+
+          if (snapshot.hasError) {
+            // Handle unexpected errors
+            return Center(
+              child: Text('Something went wrong: ${snapshot.error}'),
+            );
+          }
+
+          return !snapshot.hasData
+              ? const Center(
+                  child: Text('Nothing here'),
+                )
+              : snapshot.data!.fold((failure) {
+                  return Center(
+                    child: Text('Error here ${failure.message}'),
+                  );
+                }, (data) {
+                  if (data.isEmpty) {
+                    return const Center(
+                      child: Text('Nothing here'),
+                    );
+                  }
+                  return ListView.builder(
+                    itemCount: data.length,
+                    itemBuilder: (context, index) {
+                      final post = data[index];
+                      return MyPostTile(
+                        post: post,
+                        onUserTap: () => goUserPage(context, post.uid),
+                        onPostTap: () => goPostPage(context, post),
+                      );
+                    },
+                  );
+                });
         },
       ),
     );

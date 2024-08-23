@@ -16,6 +16,7 @@ class Post {
   final String message; //message of the post
   final Timestamp timestamp; //timestamp of the post
   final int likeCount; //like count of this post
+  final int commentCount;
   final List<String> likedBy; //list of user ids who liked this post
 
   Post({
@@ -26,19 +27,23 @@ class Post {
     required this.message,
     required this.timestamp,
     required this.likeCount,
+    required this.commentCount,
     required this.likedBy,
   });
 
   // Convert a firestore document to a Post object (to use in our app)
   factory Post.fromDocument(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+
     return Post(
       id: doc.id,
-      uid: doc['uid'],
-      name: doc['name'],
-      username: doc['username'],
-      message: doc['message'],
-      timestamp: doc['timestamp'],
-      likeCount: doc['likeCount'],
+      uid: data['uid'],
+      name: data['name'],
+      username: data['username'],
+      message: data['message'],
+      timestamp: data['timestamp'],
+      likeCount: data['likeCount'],
+      commentCount: data.containsKey('commentCount') ? data['commentCount'] : 0,
       likedBy: List<String>.from(doc['likedBy'] ?? []),
     );
   }
@@ -52,7 +57,8 @@ class Post {
       'message': message,
       'timestamp': timestamp,
       'likeCount': likeCount,
-      'likedBy': likedBy
+      'likedBy': likedBy,
+      'commentCount': commentCount,
     };
   }
 }

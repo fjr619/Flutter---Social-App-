@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eitherx/eitherx.dart';
 import 'package:flutter_twitter_clone/di/get_it.dart';
+import 'package:flutter_twitter_clone/domain/model/comment.dart';
 import 'package:flutter_twitter_clone/domain/model/failure.dart';
 import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/domain/model/user_profile.dart';
@@ -128,6 +129,7 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
           message: message,
           timestamp: Timestamp.now(),
           likeCount: 0,
+          commentCount: 0,
           likedBy: [],
         );
 
@@ -165,19 +167,23 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
           .collection('Posts')
           .orderBy('timestamp', descending: true)
           .snapshots()
-          .map<Either<Failure, List<Post>>>((snapshot) {
-        final posts =
-            snapshot.docs.map((doc) => Post.fromDocument(doc)).toList();
-        return Right(posts);
-      }).handleError((error) {
-        return Left(ServerFailure('Failed to fetch posts: $error'));
-      });
+          .map<Either<Failure, List<Post>>>(
+        (snapshot) {
+          try {
+            final posts =
+                snapshot.docs.map((doc) => Post.fromDocument(doc)).toList();
+            return Right(posts);
+          } catch (e) {
+            return Left(ServerFailure('Failed to parse posts: $e'));
+          }
+        },
+      );
     } catch (e) {
       return Stream.value(Left(ServerFailure('Failed to fetch posts: $e')));
     }
   }
 
-  // Get individuaal post
+  // Get individuaal posts
   @override
   Stream<Either<Failure, List<Post>>> getPostsUID(String uid) {
     try {
@@ -198,6 +204,25 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     }
   }
 
+  // Get post by post id
+  @override
+  Stream<Either<Failure, Post>> getPost(String id) {
+    try {
+      return _db
+          .collection('Posts')
+          .doc(id)
+          .snapshots()
+          .map<Either<Failure, Post>>((snapshot) {
+        final post = Post.fromDocument(snapshot);
+        return Right(post);
+      }).handleError((error) {
+        return Left(ServerFailure('Failed to fetch posts: $error'));
+      });
+    } catch (e) {
+      return Stream.value(Left(ServerFailure('Failed to fetch posts: $e')));
+    }
+  }
+
   /*
     LIKES
   */
@@ -206,8 +231,6 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<Either<Failure, Unit>> toggleLikeInFirebase(String postId) async {
     try {
-      log('toggleLikeInFirebase');
-
       //get current uid
       String uid = _auth.currentUser!.uid;
 
@@ -244,8 +267,6 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
           }
 
           // update firebase
-          log('likeCount $currentLikeCount');
-          log('likedby ${likedBy.length}');
           transaction.update(
             postDoc,
             {
@@ -257,11 +278,137 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
       );
       return const Right(unit);
     } on FirebaseException catch (e) {
-      log("error ${e.code}");
       return Left(ServerFailure("Error getUserProfile ${e.code}"));
     } catch (e) {
-      log("error $e");
       return const Left(ServerFailure("Error getUserProfile"));
+    }
+  }
+
+  /*
+    COMMENTS
+  */
+
+  //Add a comment to a post
+  @override
+  Future<Either<Failure, Unit>> addComment(
+      String postId, String message) async {
+    try {
+      String uid = _auth.currentUser!.uid;
+
+      final resultUser = await getUserProfile(uid);
+
+      if (resultUser.isLeft) {
+        return Left(resultUser.leftOrNull()!);
+      } else if (resultUser.isRight) {
+        UserProfile? user = resultUser.rightOrNull();
+
+        //create a new comment
+        Comment newComment = Comment(
+            id: '',
+            postId: postId,
+            uid: uid,
+            name: user?.name ?? '',
+            username: user?.username ?? '',
+            message: message,
+            timestamp: Timestamp.now());
+
+        // convert comment object to map
+        await _db.collection('Comments').add(newComment.toMap());
+
+        //go to doc for this post
+        DocumentReference postDoc = _db.collection('Posts').doc(postId);
+
+        //update comment count
+        await _db.runTransaction(
+          (transaction) async {
+            // get post data
+            DocumentSnapshot postSnapshot = await transaction.get(postDoc);
+
+            // get comment count
+            int currentCommentCount = postSnapshot['commentCount'] ?? 0;
+
+            currentCommentCount++;
+            transaction.update(
+              postDoc,
+              {
+                'commentCount': currentCommentCount,
+              },
+            );
+          },
+        );
+        return const Right(unit);
+      }
+
+      return const Left(ServerFailure("Error getUserProfile"));
+    } on FirebaseException catch (e) {
+      return Left(ServerFailure("Error getUserProfile ${e.code}"));
+    } catch (e) {
+      return const Left(ServerFailure("Error getUserProfile"));
+    }
+  }
+
+  // Delete a message
+  @override
+  Future<Either<Failure, Unit>> deleteComment(
+      String postId, String commentId) async {
+    log("delet");
+    try {
+      await _db.collection('Comments').doc(commentId).delete();
+
+      //go to doc for this post
+      DocumentReference postDoc = _db.collection('Posts').doc(postId);
+
+      //update comment count
+      await _db.runTransaction(
+        (transaction) async {
+          // get post data
+          DocumentSnapshot postSnapshot = await transaction.get(postDoc);
+
+          // get comment count
+          int currentCommentCount = postSnapshot['commentCount'] ?? 0;
+          currentCommentCount--;
+
+          transaction.update(
+            postDoc,
+            {
+              'commentCount': currentCommentCount,
+            },
+          );
+        },
+      );
+
+      return const Right(unit);
+    } on FirebaseException catch (e) {
+      log("error $e");
+      return Left(ServerFailure("Error getUserProfile ${e.code}"));
+    } catch (e) {
+      log("error deleteComment");
+      return const Left(ServerFailure("Error deleteComment"));
+    }
+  }
+
+  // Get all comments for a post
+  @override
+  Stream<Either<Failure, List<Comment>>> getPostComments(String postId) {
+    try {
+      return _db
+          .collection('Comments')
+          .where('postId', isEqualTo: postId)
+          .orderBy('timestamp', descending: true)
+          .snapshots()
+          .map<Either<Failure, List<Comment>>>((snapshot) {
+        try {
+          final comments =
+              snapshot.docs.map((doc) => Comment.fromDocument(doc)).toList();
+          return Right(comments);
+        } catch (e) {
+          return Left(ServerFailure('Failed to parse posts: $e'));
+        }
+      }).handleError((error) {
+        return Left(ServerFailure('Failed to fetch posts: $error'));
+      });
+    } catch (e) {
+      return Stream.value(Left(ServerFailure('Failed to fetch posts: $e')));
     }
   }
 }

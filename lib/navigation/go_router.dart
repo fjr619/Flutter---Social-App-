@@ -133,7 +133,7 @@ Provider<GoRouter> router() {
 CustomTransitionPage buildTransitionpage<T>({
   required LocalKey key,
   required Widget child,
-  Duration duration = const Duration(milliseconds: 200), // Durasi default 300ms
+  Duration duration = const Duration(milliseconds: 500), // Durasi default 300ms
 }) {
   return CustomTransitionPage<T>(
     key: key,

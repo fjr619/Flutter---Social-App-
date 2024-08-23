@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:eitherx/eitherx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/di/get_it.dart';
+import 'package:flutter_twitter_clone/domain/model/comment.dart';
 import 'package:flutter_twitter_clone/domain/model/failure.dart';
 import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/domain/model/user_profile.dart';
@@ -114,6 +115,10 @@ class DatabaseProvider extends ChangeNotifier {
     return databaseRepository.getPostsUID(uid);
   }
 
+  Stream<Either<Failure, Post>> getPost(String postId) {
+    return databaseRepository.getPost(postId);
+  }
+
   Future<void> deletePost(String postId) async {
     await databaseRepository.deletePost(postId);
   }
@@ -142,5 +147,21 @@ class DatabaseProvider extends ChangeNotifier {
     } else {
       return number.toString();
     }
+  }
+
+  /*
+    COMMENTS
+  */
+
+  Future<void> postComment(String comment, Post post) async {
+    await databaseRepository.addComment(post.id, comment);
+  }
+
+  Stream<Either<Failure, List<Comment>>> loadPostComments(String postId) {
+    return databaseRepository.getPostComments(postId);
+  }
+
+  Future<void> deleteComment(String postId, String commentId) async {
+    await databaseRepository.deleteComment(postId, commentId);
   }
 }

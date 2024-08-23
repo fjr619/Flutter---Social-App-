@@ -215,7 +215,7 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
                               final post = data[index];
                               return MyPostTile(
                                 post: post,
-                                onUserTap: () => goUserPage(context, post.uid),
+                                onUserTap: () => null,
                                 onPostTap: () => goPostPage(context, post),
                               );
                             },
