@@ -411,4 +411,88 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
       return Stream.value(Left(ServerFailure('Failed to fetch posts: $e')));
     }
   }
+
+  /*
+    ACCOUNT STUFF
+  */
+
+  //report post
+  @override
+  Future<void> reportUser(String postId, String userId) async {
+    try {
+      //get current user id
+      final currentUserId = _auth.currentUser!.uid;
+
+      //create a report map
+      final report = {
+        'reportedBy': currentUserId,
+        'messageId': postId,
+        'messageOwnerId': userId,
+        'timeStamp': FieldValue.serverTimestamp()
+      };
+
+      //update in firestore
+      await _db.collection('Reports').add(report);
+    } catch (e) {
+      log("error $e");
+    }
+  }
+
+  //block user
+  @override
+  Future<void> blockUser(String userId) async {
+    //get current user id
+    final currentUserId = _auth.currentUser!.uid;
+
+    //add this user to blocked list
+    await _db
+        .collection('Users')
+        .doc(currentUserId)
+        .collection('BlockedUsers')
+        .doc(userId)
+        .set({});
+  }
+
+  // unblock user
+  @override
+  Future<void> unblockUser(String userId) async {
+    //get current user id
+    final currentUserId = _auth.currentUser!.uid;
+
+    //add this user to blocked list
+    await _db
+        .collection('Users')
+        .doc(currentUserId)
+        .collection('BlockedUsers')
+        .doc(userId)
+        .delete();
+  }
+
+  // get list of blocked user ids
+  @override
+  Stream<List<String>> getBlockedUids() {
+    //get current user id
+    final currentUserId = _auth.currentUser!.uid;
+
+    //get data of blocked users
+    try {
+      return _db
+          .collection('Users')
+          .doc(currentUserId)
+          .collection('BlockedUsers')
+          .snapshots()
+          .map<List<String>>((snapshot) {
+        try {
+          final listId = snapshot.docs.map((doc) => doc.id).toList();
+          return listId;
+        } catch (e) {
+          return List.empty();
+        }
+      }).handleError((error) {
+        return List.empty();
+      });
+    } catch (e) {
+      return Stream.value(List.empty());
+    }
+  }
 }

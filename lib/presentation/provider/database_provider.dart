@@ -164,4 +164,28 @@ class DatabaseProvider extends ChangeNotifier {
   Future<void> deleteComment(String postId, String commentId) async {
     await databaseRepository.deleteComment(postId, commentId);
   }
+
+  /*
+    ACCOUNT STUFF
+  */
+
+  //report post
+  Future<void> reportUser(String postId, String userId) async {
+    await databaseRepository.reportUser(postId, userId);
+  }
+
+  //block user
+  Future<void> blockUser(String userId) async {
+    await databaseRepository.blockUser(userId);
+  }
+
+  // unblock user
+  Future<void> unblockUser(String userId) async {
+    await databaseRepository.unblockUser(userId);
+  }
+
+  // get list of blocked user ids
+  Stream<List<String>> getBlockedUids() {
+    return databaseRepository.getBlockedUids();
+  }
 }

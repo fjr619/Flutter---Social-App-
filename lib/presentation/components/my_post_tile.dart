@@ -14,8 +14,6 @@
 
 */
 
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_input_alert_box.dart';
@@ -72,6 +70,12 @@ class _MyPostTileState extends State<MyPostTile> {
     );
   }
 
+  void showSuccessSnackbar(bool needPop, String message) {
+    if (needPop) context.pop();
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
   void _showOptions(BuildContext context) {
     //check if this post in owned by the user or not
     String currentUid =
@@ -85,6 +89,32 @@ class _MyPostTileState extends State<MyPostTile> {
 
     reportUser(BuildContext context) {
       context.pop();
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Report Message'),
+          content: const Text('Are you sure you want to report this message?'),
+          actions: [
+            TextButton(
+              onPressed: () => context.pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await context
+                    .read<DatabaseProvider>()
+                    .reportUser(widget.post.id, widget.post.uid);
+                showSuccessSnackbar(true, 'Message reported');
+              },
+              child: Text(
+                'Report',
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.inversePrimary),
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     blockUser(BuildContext context) {

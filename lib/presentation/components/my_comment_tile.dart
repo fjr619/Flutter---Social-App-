@@ -15,9 +15,7 @@ To use this widget, you need:
 
 */
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_twitter_clone/domain/model/comment.dart';
 import 'package:flutter_twitter_clone/presentation/provider/auth_provider.dart';
 import 'package:flutter_twitter_clone/presentation/provider/database_provider.dart';

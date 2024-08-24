@@ -21,4 +21,9 @@ abstract class DatabaseRepository {
   Future<Either<Failure, Unit>> addComment(String postId, String message);
   Future<Either<Failure, Unit>> deleteComment(String postId, String commentId);
   Stream<Either<Failure, List<Comment>>> getPostComments(String postId);
+
+  Future<void> reportUser(String postId, String userId);
+  Future<void> blockUser(String userId);
+  Future<void> unblockUser(String userId);
+  Stream<List<String>> getBlockedUids();
 }

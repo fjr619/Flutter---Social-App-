@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:eitherx/eitherx.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_twitter_clone/di/get_it.dart';
 import 'package:flutter_twitter_clone/domain/model/failure.dart';
 import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/navigation/go_router.dart';

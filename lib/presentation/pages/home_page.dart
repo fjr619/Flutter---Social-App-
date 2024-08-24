@@ -117,6 +117,8 @@ class _HomePageState extends State<HomePage> {
 
       //floating button
       floatingActionButton: FloatingActionButton(
+        elevation: 0,
+        highlightElevation: 0,
         onPressed: _openPostMessageBox,
         child: const Icon(Icons.add),
       ),
