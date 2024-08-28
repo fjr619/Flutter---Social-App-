@@ -9,6 +9,7 @@ abstract class DatabaseRepository {
       {required String name, required String email});
   Future<Either<Failure, UserProfile?>> getUserProfile(String uid);
   Future<Either<Failure, Unit>> updateUserBio(String bio);
+  Future<void> deleteUserInfo();
 
   Future<Either<Failure, Unit>> postMessage(String message);
   Stream<Either<Failure, List<Post>>> getAllPosts();

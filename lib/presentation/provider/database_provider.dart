@@ -99,6 +99,10 @@ class DatabaseProvider extends ChangeNotifier {
     );
   }
 
+  Future<void> deleteUserInfo() async {
+    await databaseRepository.deleteUserInfo();
+  }
+
   /*
     POSTS
   */

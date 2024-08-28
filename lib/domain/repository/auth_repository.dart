@@ -9,4 +9,5 @@ abstract class AuthRepository {
   Future<Either<Failure, UserCredential>> register(
       String email, String password);
   Future<void> logout();
+  Future<void> deleteUser();
 }

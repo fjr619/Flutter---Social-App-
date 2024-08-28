@@ -50,13 +50,23 @@ class SettingsPage extends StatelessWidget {
             action: IconButton(
               onPressed: () => goBlockedUserPage(context),
               icon: Icon(
-                Icons.arrow_forward,
+                Icons.arrow_forward_ios_rounded,
                 color: Theme.of(context).colorScheme.primary,
               ),
             ),
           ),
 
           // account settings tile
+          MySettingsTile(
+            title: 'Account Settings',
+            action: IconButton(
+              onPressed: () => goAccountSettingsPage(context),
+              icon: Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
         ],
       ),
     );

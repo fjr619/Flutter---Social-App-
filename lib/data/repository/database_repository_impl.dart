@@ -93,6 +93,7 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     }
   }
 
+  // update user info
   @override
   Future<Either<Failure, Unit>> updateUserBio(String bio) async {
     // get current uid
@@ -104,6 +105,42 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
       return const Right(unit);
     } catch (e) {
       return const Left(ServerFailure("Error updateUserBio"));
+    }
+  }
+
+  // delete user info
+  @override
+  Future<void> deleteUserInfo() async {
+    if (_auth.currentUser != null) {
+      String uid = _auth.currentUser!.uid;
+
+      WriteBatch batch = _db.batch();
+
+      // dlete user doc
+      DocumentReference userDoc = _db.collection('Users').doc(uid);
+      batch.delete(userDoc);
+
+      // delete user posts
+      QuerySnapshot userPosts =
+          await _db.collection('Posts').where('uid', isEqualTo: uid).get();
+      for (var post in userPosts.docs) {
+        batch.delete(post.reference);
+      }
+
+      // delete user comments
+      QuerySnapshot userComments =
+          await _db.collection('Comments').where('uid', isEqualTo: uid).get();
+      for (var comment in userComments.docs) {
+        batch.delete(comment.reference);
+      }
+
+      // update followers and following records
+
+      // commit batch
+      await batch.commit();
+
+      // delete user
+      await _auth.deleteUser();
     }
   }
 
