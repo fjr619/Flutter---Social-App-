@@ -25,5 +25,5 @@ abstract class DatabaseRepository {
   Future<void> reportUser(String postId, String userId);
   Future<void> blockUser(String userId);
   Future<void> unblockUser(String userId);
-  Stream<List<String>> getBlockedUids();
+  Stream<List<UserProfile>> getBlockedUids();
 }

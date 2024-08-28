@@ -8,6 +8,7 @@ import 'package:flutter_twitter_clone/navigation/go_router.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_bio_box.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_input_alert_box.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_post_tile.dart';
+import 'package:flutter_twitter_clone/presentation/provider/auth_provider.dart';
 import 'package:flutter_twitter_clone/presentation/provider/database_provider.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
@@ -39,6 +40,8 @@ class ProfilePageContent extends StatefulWidget {
 
 class _ProfilePageContentState extends State<ProfilePageContent> {
   late final DatabaseProvider databaseProvider =
+      Provider.of(context, listen: false);
+  late final AuthenticationProvider authProvider =
       Provider.of(context, listen: false);
   late final DatabaseProvider listenDatabaseProvider = Provider.of(context);
   final bioController = TextEditingController();
@@ -149,13 +152,15 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
                       color: Theme.of(context).colorScheme.primary,
                       fontSize: 16),
                 ),
-                IconButton(
-                  onPressed: _showEditBioBox,
-                  icon: Icon(
-                    Icons.settings,
-                    color: Theme.of(context).colorScheme.primary,
+                if (widget.uid == authProvider.currentUser?.uid) ...{
+                  IconButton(
+                    onPressed: _showEditBioBox,
+                    icon: Icon(
+                      Icons.settings,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
-                ),
+                },
               ],
             ),
           ),

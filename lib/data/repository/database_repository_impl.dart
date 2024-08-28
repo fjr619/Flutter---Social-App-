@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/domain/model/user_profile.dart';
 import 'package:flutter_twitter_clone/domain/repository/auth_repository.dart';
 import 'package:flutter_twitter_clone/domain/repository/database_repository.dart';
+import 'package:rxdart/rxdart.dart';
 
 /* DATABASE REPOSITORY IMPLEMENTATION
 *
@@ -159,20 +161,51 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     }
   }
 
+  Stream<List<String>> getExcludedUserIdsStream(String currentUserId) {
+    return FirebaseFirestore.instance
+        .collection('Users')
+        .doc(currentUserId)
+        .collection('BlockedUsers')
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) => doc.id).toList();
+    });
+  }
+
   // Get all posts from firebase
   @override
   Stream<Either<Failure, List<Post>>> getAllPosts() {
     try {
-      return _db
+      String uid = _auth.currentUser!.uid;
+
+      // Stream untuk mendapatkan blockedUserId secara real-time
+      Stream<List<String>> blockedUserIdStream = FirebaseFirestore.instance
+          .collection('Users')
+          .doc(uid)
+          .collection('BlockedUsers')
+          .snapshots()
+          .map((snapshot) => snapshot.docs.map((doc) => doc.id).toList());
+
+      // Stream untuk mendapatkan posts dari Firestore
+      Stream<QuerySnapshot> postsStream = _db
           .collection('Posts')
           .orderBy('timestamp', descending: true)
-          .snapshots()
-          .map<Either<Failure, List<Post>>>(
-        (snapshot) {
+          .snapshots();
+
+      // Gabungkan kedua stream menggunakan combineLatest2 dari rxdart
+      return Rx.combineLatest2<List<String>, QuerySnapshot,
+          Either<Failure, List<Post>>>(
+        blockedUserIdStream,
+        postsStream,
+        (excludedUserIds, snapshot) {
           try {
-            final posts =
-                snapshot.docs.map((doc) => Post.fromDocument(doc)).toList();
-            return Right(posts);
+            // Filter posts berdasarkan excludedUserIds
+            final filteredPosts = snapshot.docs
+                .where((doc) => !excludedUserIds.contains(doc['uid']))
+                .map((doc) => Post.fromDocument(doc))
+                .toList();
+
+            return Right(filteredPosts);
           } catch (e) {
             return Left(ServerFailure('Failed to parse posts: $e'));
           }
@@ -470,29 +503,46 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
 
   // get list of blocked user ids
   @override
-  Stream<List<String>> getBlockedUids() {
-    //get current user id
+  Stream<List<UserProfile>> getBlockedUids() {
+    // Dapatkan current user id
     final currentUserId = _auth.currentUser!.uid;
 
-    //get data of blocked users
-    try {
-      return _db
-          .collection('Users')
-          .doc(currentUserId)
-          .collection('BlockedUsers')
-          .snapshots()
-          .map<List<String>>((snapshot) {
-        try {
-          final listId = snapshot.docs.map((doc) => doc.id).toList();
-          return listId;
-        } catch (e) {
-          return List.empty();
-        }
-      }).handleError((error) {
-        return List.empty();
+    // Stream untuk mendapatkan blocked user IDs
+    Stream<List<String>> blockedUidsStream = _db
+        .collection('Users')
+        .doc(currentUserId)
+        .collection('BlockedUsers')
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) => doc.id).toList();
+    });
+
+    // Menggunakan switchMap untuk menggabungkan blockedUids dengan UserProfile dari Users
+    return blockedUidsStream.switchMap((blockedUids) {
+      if (blockedUids.isEmpty) {
+        return Stream.value([]);
+      }
+
+      // Menggabungkan UserProfile dari setiap blocked user ID
+      final profileStreams = blockedUids.map((uid) {
+        return _db.collection('Users').doc(uid).snapshots().map((snapshot) {
+          if (snapshot.exists) {
+            return UserProfile.fromDocument(snapshot);
+          } else {
+            return UserProfile(
+                uid: uid,
+                username: 'Unknown',
+                email: 'Unknown',
+                name: 'Unknown',
+                bio: '');
+          }
+        });
       });
-    } catch (e) {
-      return Stream.value(List.empty());
-    }
+
+      // Menggunakan combineLatest untuk mendapatkan semua UserProfile sebagai satu stream
+      return CombineLatestStream.list(profileStreams).map((profiles) {
+        return profiles.cast<UserProfile>();
+      });
+    });
   }
 }

@@ -185,7 +185,7 @@ class DatabaseProvider extends ChangeNotifier {
   }
 
   // get list of blocked user ids
-  Stream<List<String>> getBlockedUids() {
+  Stream<List<UserProfile>> getBlockedUids() {
     return databaseRepository.getBlockedUids();
   }
 }

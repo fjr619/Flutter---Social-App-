@@ -72,54 +72,93 @@ class _MyPostTileState extends State<MyPostTile> {
 
   void showSuccessSnackbar(bool needPop, String message) {
     if (needPop) context.pop();
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      duration: const Duration(seconds: 1),
+    ));
   }
+
+  _deletePost(BuildContext context) async {
+    context.pop();
+    await context.read<DatabaseProvider>().deletePost(widget.post.id);
+  }
+
+  _reportUserConfirmation(BuildContext context) {
+    context.pop();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Report Message'),
+        content: const Text('Are you sure you want to report this message?'),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await context
+                  .read<DatabaseProvider>()
+                  .reportUser(widget.post.id, widget.post.uid);
+              showSuccessSnackbar(true, 'Message reported');
+            },
+            child: Text(
+              'Report',
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.inversePrimary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  _blockUserConfirmation(BuildContext context) {
+    context.pop();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Block User'),
+        content: const Text('Are you sure you want to block this user?'),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await context.read<DatabaseProvider>().blockUser(widget.post.uid);
+              showSuccessSnackbar(true, 'User blocked');
+            },
+            child: Text(
+              'Block',
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.inversePrimary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /* 
+    Show options
+    
+    Case 1: This post belongs to current user
+    - delete
+    - cancel
+
+    case 2: this post does NOT belongs to current user
+    - report
+    - block
+    - cancel
+  */
 
   void _showOptions(BuildContext context) {
     //check if this post in owned by the user or not
     String currentUid =
         context.read<AuthenticationProvider>().currentUser?.uid ?? '';
     final bool isOwnPost = widget.post.uid == currentUid;
-
-    deletePost(BuildContext context) async {
-      context.pop();
-      await context.read<DatabaseProvider>().deletePost(widget.post.id);
-    }
-
-    reportUser(BuildContext context) {
-      context.pop();
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Report Message'),
-          content: const Text('Are you sure you want to report this message?'),
-          actions: [
-            TextButton(
-              onPressed: () => context.pop(),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                await context
-                    .read<DatabaseProvider>()
-                    .reportUser(widget.post.id, widget.post.uid);
-                showSuccessSnackbar(true, 'Message reported');
-              },
-              child: Text(
-                'Report',
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.inversePrimary),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    blockUser(BuildContext context) {
-      context.pop();
-    }
 
     //show options
     showModalBottomSheet(
@@ -138,7 +177,7 @@ class _MyPostTileState extends State<MyPostTile> {
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: () => deletePost(context),
+                      onTap: () => _deletePost(context),
                       child: const ListTile(
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.horizontal(
@@ -160,7 +199,7 @@ class _MyPostTileState extends State<MyPostTile> {
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: () => reportUser(context),
+                      onTap: () => _reportUserConfirmation(context),
                       child: const ListTile(
                         leading: Icon(Icons.flag),
                         title: Text('Report'),
@@ -172,7 +211,7 @@ class _MyPostTileState extends State<MyPostTile> {
                 ListTile(
                   leading: const Icon(Icons.block),
                   title: const Text('Block'),
-                  onTap: () => blockUser(context),
+                  onTap: () => _blockUserConfirmation(context),
                 ),
               },
 

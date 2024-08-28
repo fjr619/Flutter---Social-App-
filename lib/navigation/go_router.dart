@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/domain/model/post.dart';
+import 'package:flutter_twitter_clone/presentation/pages/blocked_user_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/home_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/login_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/post_page.dart';
@@ -18,6 +19,7 @@ class AppRoute {
   static const String register = "Register";
   static const String profile = "Profile";
   static const String post = "Post";
+  static const String blockedUser = "BlockedUser";
 }
 
 Provider<GoRouter> router() {
@@ -124,6 +126,18 @@ Provider<GoRouter> router() {
               );
             },
           ),
+
+          //blocked user
+          GoRoute(
+            name: AppRoute.blockedUser,
+            path: '/blockedUser',
+            pageBuilder: (context, state) {
+              return buildTransitionpage(
+                key: state.pageKey,
+                child: const BlockedUserPage(),
+              );
+            },
+          ),
         ],
       );
     },
@@ -154,4 +168,8 @@ void goUserPage(BuildContext context, String uid) {
 
 void goPostPage(BuildContext context, Post post) {
   context.pushNamed(AppRoute.post, extra: post);
+}
+
+void goBlockedUserPage(BuildContext context) {
+  context.pushNamed(AppRoute.blockedUser);
 }
