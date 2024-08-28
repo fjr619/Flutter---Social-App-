@@ -91,13 +91,38 @@ class _BlockedUserPageState extends State<BlockedUserPage> {
                         itemCount: snapshot.data?.length,
                         itemBuilder: (context, index) {
                           final user = snapshot.data?[index];
-                          return ListTile(
-                            title: Text('${user?.name}'),
-                            subtitle: Text('@${user?.username}'),
-                            trailing: IconButton(
-                              onPressed: () =>
-                                  _showUnblockConfirmation(user!.uid),
-                              icon: const Icon(Icons.block),
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            child: ListTile(
+                              tileColor:
+                                  Theme.of(context).colorScheme.secondary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              title: Text(
+                                '${user?.name}',
+                                style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .inversePrimary),
+                              ),
+                              subtitle: Text(
+                                '@${user?.username}',
+                                style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
+                              ),
+                              trailing: IconButton(
+                                onPressed: () =>
+                                    _showUnblockConfirmation(user!.uid),
+                                icon: Icon(
+                                  Icons.block,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .inversePrimary,
+                                ),
+                              ),
                             ),
                           );
                         },
