@@ -1,6 +1,7 @@
 import 'package:eitherx/eitherx.dart';
 import 'package:flutter_twitter_clone/domain/model/comment.dart';
 import 'package:flutter_twitter_clone/domain/model/failure.dart';
+import 'package:flutter_twitter_clone/domain/model/following.dart';
 import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/domain/model/user_profile.dart';
 
@@ -27,4 +28,10 @@ abstract class DatabaseRepository {
   Future<void> blockUser(String userId);
   Future<void> unblockUser(String userId);
   Stream<List<UserProfile>> getBlockedUids();
+
+  Future<void> followUser(String targetUid);
+  Future<void> unfollowUser(String targetUid);
+  Stream<List<Following>> getFollowers(String uid);
+  Stream<List<Following>> getFollowing(String uid);
+  Stream<bool> isUserFollowed(String targetUid);
 }

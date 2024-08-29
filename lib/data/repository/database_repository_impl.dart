@@ -6,6 +6,7 @@ import 'package:eitherx/eitherx.dart';
 import 'package:flutter_twitter_clone/di/get_it.dart';
 import 'package:flutter_twitter_clone/domain/model/comment.dart';
 import 'package:flutter_twitter_clone/domain/model/failure.dart';
+import 'package:flutter_twitter_clone/domain/model/following.dart';
 import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/domain/model/user_profile.dart';
 import 'package:flutter_twitter_clone/domain/repository/auth_repository.dart';
@@ -231,7 +232,19 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Future<Either<Failure, Unit>> deletePost(String postId) async {
     try {
+      // Query comments with the specified postId
+      QuerySnapshot commentsSnapshot = await _db
+          .collection('Comments')
+          .where('postId', isEqualTo: postId)
+          .get();
+
+      // Iterate over the comments and delete each one
+      for (var doc in commentsSnapshot.docs) {
+        await doc.reference.delete();
+      }
+
       await _db.collection('Posts').doc(postId).delete();
+
       return const Right(unit);
     } on FirebaseException catch (e) {
       return Left(ServerFailure("Error getUserProfile ${e.code}"));
@@ -459,7 +472,7 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     }
   }
 
-  // Delete a message
+  // Delete a comment
   @override
   Future<Either<Failure, Unit>> deleteComment(
       String postId, String commentId) async {
@@ -622,6 +635,142 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
       return CombineLatestStream.list(profileStreams).map((profiles) {
         return profiles.cast<UserProfile>();
       });
+    });
+  }
+
+  /*
+    FOLLOW
+  */
+
+  //follow user
+  @override
+  Future<void> followUser(String targetUid) async {
+    // get current logged in user
+    try {
+      final currentUserId = _auth.currentUser!.uid;
+      DocumentSnapshot currentUserDoc =
+          await _db.collection('Users').doc(currentUserId).get();
+      final currentUser = UserProfile.fromDocument(currentUserDoc);
+
+      // get target user
+      DocumentSnapshot targetUserDoc =
+          await _db.collection('Users').doc(targetUid).get();
+      final targetUser = UserProfile.fromDocument(targetUserDoc);
+
+      // add target user to the current user's following
+
+      await _db
+          .collection('Users')
+          .doc(currentUserId)
+          .collection('Following')
+          .doc(targetUid)
+          .set(
+            Following(
+              username: targetUser.username,
+              uid: targetUid,
+              name: targetUser.name,
+            ).toMap(),
+          );
+
+      //add current user to target user's followers
+      await _db
+          .collection('Users')
+          .doc(targetUid)
+          .collection('Followers')
+          .doc(currentUserId)
+          .set(
+            Following(
+              username: currentUser.username,
+              uid: currentUserId,
+              name: currentUser.name,
+            ).toMap(),
+          );
+    } catch (e) {
+      log('error ${e.toString()}');
+    }
+  }
+
+  //unfollow user
+  @override
+  Future<void> unfollowUser(String targetUid) async {
+    // get current logged in user
+    final currentUserId = _auth.currentUser!.uid;
+
+    // remove target user from the current user's following
+    await _db
+        .collection('Users')
+        .doc(currentUserId)
+        .collection('Following')
+        .doc(targetUid)
+        .delete();
+
+    //remove current user to target user's followers
+    await _db
+        .collection('Users')
+        .doc(targetUid)
+        .collection('Followers')
+        .doc(currentUserId)
+        .delete();
+  }
+
+  //get a user's followers: list of uids
+  @override
+  Stream<List<Following>> getFollowers(String uid) {
+    try {
+      return _db
+          .collection('Users')
+          .doc(uid)
+          .collection('Followers')
+          .snapshots()
+          .map((snapshot) {
+        try {
+          return snapshot.docs
+              .map(
+                (doc) => Following.fromDocument(doc),
+              )
+              .toList();
+        } catch (e) {
+          return [];
+        }
+      });
+    } catch (e) {
+      return Stream.value([]);
+    }
+  }
+
+  //get a user's following: list of uids
+  @override
+  Stream<List<Following>> getFollowing(String uid) {
+    try {
+      return _db
+          .collection('Users')
+          .doc(uid)
+          .collection('Following')
+          .snapshots()
+          .map((snapshot) {
+        try {
+          return snapshot.docs
+              .map(
+                (doc) => Following.fromDocument(doc),
+              )
+              .toList();
+        } catch (e) {
+          return [];
+        }
+      });
+    } catch (e) {
+      return Stream.value([]);
+    }
+  }
+
+  //check if current user already following target uid
+  @override
+  Stream<bool> isUserFollowed(String targetUid) {
+    // get current logged in user
+    final currentUserId = _auth.currentUser!.uid;
+
+    return getFollowing(currentUserId).map((followingList) {
+      return followingList.any((following) => following.uid == targetUid);
     });
   }
 }

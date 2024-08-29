@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-
 /*
  USER BIO BOX
  
@@ -10,6 +7,8 @@ import 'package:flutter/widgets.dart';
 
  - text
 */
+
+import 'package:flutter/material.dart';
 
 class MyBioBox extends StatelessWidget {
   final String text;

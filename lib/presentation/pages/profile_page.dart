@@ -3,14 +3,19 @@ import 'dart:developer';
 import 'package:eitherx/eitherx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/domain/model/failure.dart';
+import 'package:flutter_twitter_clone/domain/model/following.dart';
 import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/navigation/go_router.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_bio_box.dart';
+import 'package:flutter_twitter_clone/presentation/components/my_follow_button.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_input_alert_box.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_post_tile.dart';
+import 'package:flutter_twitter_clone/presentation/components/my_profile_stats.dart';
 import 'package:flutter_twitter_clone/presentation/provider/auth_provider.dart';
 import 'package:flutter_twitter_clone/presentation/provider/database_provider.dart';
+import 'package:flutter_twitter_clone/presentation/util/extension.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -46,11 +51,18 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
   late final DatabaseProvider listenDatabaseProvider = Provider.of(context);
   final bioController = TextEditingController();
   late Stream<Either<Failure, List<Post>>> _stream;
+  late Stream<bool> _streamIsFollowed;
+  late Stream<List<Following>> _streamFollowing;
+  late Stream<List<Following>> _streamFollowers;
+  var _isFollowing = false;
 
   @override
   void initState() {
     super.initState();
     _stream = databaseProvider.getUserPosts(widget.uid);
+    _streamIsFollowed = databaseProvider.isUserFollowed(widget.uid);
+    _streamFollowing = databaseProvider.getFollowing(widget.uid);
+    _streamFollowers = databaseProvider.getFollowers(widget.uid);
     loadUser();
   }
 
@@ -61,6 +73,7 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
     log('profile page dispose');
   }
 
+  //load user
   void loadUser() async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
@@ -74,7 +87,7 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
     });
   }
 
-  // // show edit bio box
+  // show edit bio box
   void _showEditBioBox() {
     showDialog(
         context: context,
@@ -85,11 +98,40 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
             onPressedText: 'Save'));
   }
 
-  // // save user bio
+  // save user bio
   Future<void> saveBio() async {
     databaseProvider.showLoading();
     await databaseProvider.updateUserBio(bioController.text);
     loadUser();
+  }
+
+  // toggle follow
+  Future<void> _toggleFollow() async {
+    if (_isFollowing) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Unfollow'),
+          content: const Text('Are you sure you want to unfollow?'),
+          actions: [
+            TextButton(
+                onPressed: () => context.pop(), child: const Text('Cancel')),
+            TextButton(
+                onPressed: () async {
+                  context.pop();
+                  databaseProvider.unfollowUser(widget.uid);
+                },
+                child: Text(
+                  'Unfollow',
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.inversePrimary),
+                )),
+          ],
+        ),
+      );
+    } else {
+      await databaseProvider.followUser(widget.uid);
+    }
   }
 
   @override
@@ -137,8 +179,59 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
           const Gap(25),
 
           //profile stats -> number of post / followers / following
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                StreamBuilder(
+                  stream: _stream,
+                  builder: (context, snapshot) {
+                    var count = snapshot.data?.rightOrNull()?.length ?? 0;
+                    return MyProfileStats(
+                        count: count.formatNumber(), text: 'Posts');
+                  },
+                ),
+                StreamBuilder(
+                  stream: _streamFollowers,
+                  builder: (context, snapshot) {
+                    var count = snapshot.data?.length ?? 0;
+                    return MyProfileStats(
+                        count: count.formatNumber(), text: 'Followers');
+                  },
+                ),
+                StreamBuilder(
+                  stream: _streamFollowing,
+                  builder: (context, snapshot) {
+                    var count = snapshot.data?.length ?? 0;
+                    return MyProfileStats(
+                        count: count.formatNumber(), text: 'Following');
+                  },
+                ),
+              ],
+            ),
+          ),
 
           //follow / unfollow button
+          //only show if the user is viewing someone else profile
+          if (widget.uid != authProvider.currentUser?.uid) ...{
+            StreamBuilder<bool>(
+              stream: _streamIsFollowed,
+              builder: (context, snapshot) {
+                var isFollowing = false;
+                if (snapshot.hasData) {
+                  isFollowing = snapshot.data ?? false;
+                }
+
+                _isFollowing = isFollowing;
+
+                return MyFollowButton(
+                  onPressed: _toggleFollow,
+                  isFollowing: isFollowing,
+                );
+              },
+            ),
+          },
 
           // edit bio
           Padding(

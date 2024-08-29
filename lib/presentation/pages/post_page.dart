@@ -16,10 +16,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/domain/model/comment.dart';
 import 'package:flutter_twitter_clone/domain/model/failure.dart';
 import 'package:flutter_twitter_clone/domain/model/post.dart';
+import 'package:flutter_twitter_clone/main.dart';
 import 'package:flutter_twitter_clone/navigation/go_router.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_comment_tile.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_post_tile.dart';
 import 'package:flutter_twitter_clone/presentation/provider/database_provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class PostPage extends StatefulWidget {
@@ -78,6 +80,7 @@ class _PostPageState extends State<PostPage> {
                           post: post,
                           onUserTap: () => goUserPage(context, post.uid),
                           onPostTap: () => null,
+                          doAfterDelete: () => context.pop(),
                         );
                       });
               }

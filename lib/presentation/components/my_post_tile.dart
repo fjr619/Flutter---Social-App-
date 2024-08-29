@@ -20,6 +20,7 @@ import 'package:flutter_twitter_clone/main.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_input_alert_box.dart';
 import 'package:flutter_twitter_clone/presentation/provider/auth_provider.dart';
 import 'package:flutter_twitter_clone/presentation/provider/database_provider.dart';
+import 'package:flutter_twitter_clone/presentation/util/extension.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -28,12 +29,14 @@ class MyPostTile extends StatefulWidget {
   final Post post;
   final Function()? onUserTap;
   final Function()? onPostTap;
+  final Function()? doAfterDelete;
 
   const MyPostTile({
     super.key,
     required this.post,
     required this.onUserTap,
     required this.onPostTap,
+    this.doAfterDelete,
   });
 
   @override
@@ -85,6 +88,9 @@ class _MyPostTileState extends State<MyPostTile> {
   _deletePost(BuildContext context) async {
     context.pop();
     await context.read<DatabaseProvider>().deletePost(widget.post.id);
+    if (widget.doAfterDelete != null) {
+      widget.doAfterDelete!();
+    }
   }
 
   _reportUserConfirmation(BuildContext context) {
@@ -365,9 +371,7 @@ class _MyPostTileState extends State<MyPostTile> {
                         ),
                       ),
                       Text(
-                        context
-                            .watch<DatabaseProvider>()
-                            .formatNumber(widget.post.likeCount),
+                        widget.post.likeCount.formatNumber(),
                         style: TextStyle(
                             color: Theme.of(context).colorScheme.primary,
                             fontSize: 12),
@@ -393,9 +397,7 @@ class _MyPostTileState extends State<MyPostTile> {
                       ),
                     ),
                     Text(
-                      context
-                          .watch<DatabaseProvider>()
-                          .formatNumber(widget.post.commentCount),
+                      widget.post.commentCount.formatNumber(),
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontSize: 12),

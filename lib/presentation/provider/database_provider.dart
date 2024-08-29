@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/di/get_it.dart';
 import 'package:flutter_twitter_clone/domain/model/comment.dart';
 import 'package:flutter_twitter_clone/domain/model/failure.dart';
+import 'package:flutter_twitter_clone/domain/model/following.dart';
 import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/domain/model/user_profile.dart';
 import 'package:flutter_twitter_clone/domain/repository/database_repository.dart';
@@ -143,18 +144,6 @@ class DatabaseProvider extends ChangeNotifier {
     await databaseRepository.toggleLikeInFirebase(postId);
   }
 
-  String formatNumber(int number) {
-    if (number >= 1000000000) {
-      return '${(number / 1000000000).toStringAsFixed(1)}B';
-    } else if (number >= 1000000) {
-      return '${(number / 1000000).toStringAsFixed(1)}M';
-    } else if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(1)}K';
-    } else {
-      return number.toString();
-    }
-  }
-
   /*
     COMMENTS
   */
@@ -193,5 +182,29 @@ class DatabaseProvider extends ChangeNotifier {
   // get list of blocked user ids
   Stream<List<UserProfile>> getBlockedUids() {
     return databaseRepository.getBlockedUids();
+  }
+
+  /*
+    FOLLOWING
+  */
+
+  Future<void> followUser(String targetUid) async {
+    await databaseRepository.followUser(targetUid);
+  }
+
+  Future<void> unfollowUser(String targetUid) async {
+    await databaseRepository.unfollowUser(targetUid);
+  }
+
+  Stream<List<Following>> getFollowers(String uid) {
+    return databaseRepository.getFollowers(uid);
+  }
+
+  Stream<List<Following>> getFollowing(String uid) {
+    return databaseRepository.getFollowing(uid);
+  }
+
+  Stream<bool> isUserFollowed(String uid) {
+    return databaseRepository.isUserFollowed(uid);
   }
 }
