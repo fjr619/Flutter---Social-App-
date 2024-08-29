@@ -9,6 +9,8 @@ import 'package:flutter_twitter_clone/presentation/provider/theme_provider.dart'
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await setupLocator();

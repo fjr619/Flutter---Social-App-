@@ -130,8 +130,33 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
       // delete user comments
       QuerySnapshot userComments =
           await _db.collection('Comments').where('uid', isEqualTo: uid).get();
-      for (var comment in userComments.docs) {
-        batch.delete(comment.reference);
+
+      for (var commentQuery in userComments.docs) {
+        // Convert each document to a Comment data class
+        Comment comment = Comment.fromDocument(commentQuery);
+
+        DocumentReference postDoc = _db.collection('Posts').doc(comment.postId);
+
+        //update comment count
+        await _db.runTransaction(
+          (transaction) async {
+            // get post data
+            DocumentSnapshot postSnapshot = await transaction.get(postDoc);
+
+            // get comment count
+            int currentCommentCount = postSnapshot['commentCount'] ?? 0;
+            if (currentCommentCount != 0) currentCommentCount--;
+
+            transaction.update(
+              postDoc,
+              {
+                'commentCount': currentCommentCount,
+              },
+            );
+          },
+        );
+
+        batch.delete(commentQuery.reference);
       }
 
       // update followers and following records

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/domain/model/post.dart';
+import 'package:flutter_twitter_clone/main.dart';
 import 'package:flutter_twitter_clone/presentation/pages/account_settings_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/blocked_user_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/home_page.dart';
@@ -35,6 +36,7 @@ Provider<GoRouter> router() {
           Provider.of<DatabaseProvider>(context, listen: false);
 
       return GoRouter(
+        navigatorKey: navigatorKey,
         refreshListenable: Listenable.merge([
           firestoreProvider,
           authProvider,

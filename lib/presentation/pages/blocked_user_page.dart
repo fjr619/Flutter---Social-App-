@@ -1,9 +1,5 @@
-import 'package:eitherx/eitherx.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_twitter_clone/domain/model/failure.dart';
 import 'package:flutter_twitter_clone/domain/model/user_profile.dart';
-import 'package:flutter_twitter_clone/main.dart';
 import 'package:flutter_twitter_clone/presentation/provider/database_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';

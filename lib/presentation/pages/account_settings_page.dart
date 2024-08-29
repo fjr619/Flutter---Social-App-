@@ -9,7 +9,6 @@
 */
 
 import 'package:flutter/material.dart';
-import 'package:flutter_twitter_clone/main.dart';
 import 'package:flutter_twitter_clone/presentation/provider/database_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -31,8 +30,8 @@ class AccountSettingsPage extends StatelessWidget {
           ),
           TextButton(
             onPressed: () async {
+              context.pop();
               await context.read<DatabaseProvider>().deleteUserInfo();
-              if (context.mounted) context.pop();
             },
             child: Text(
               'Delete',
@@ -54,31 +53,35 @@ class AccountSettingsPage extends StatelessWidget {
         centerTitle: true,
         foregroundColor: Theme.of(context).colorScheme.primary,
       ),
-      body: Column(
-        children: [
-          //dlete tile
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
+      body: context.watch<DatabaseProvider>().isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : Column(
+              children: [
+                //dlete tile
+                Padding(
                   padding: const EdgeInsets.all(16),
-                  elevation: 0,
-                  shadowColor: Colors.transparent,
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.red,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.all(16),
+                        elevation: 0,
+                        shadowColor: Colors.transparent,
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () => _deleteConfirmation(context),
+                      child: const Text('Delete Account'),
+                    ),
                   ),
                 ),
-                onPressed: () => _deleteConfirmation(context),
-                child: const Text('Delete Account'),
-              ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

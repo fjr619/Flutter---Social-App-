@@ -29,14 +29,26 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-class RegisterPage extends StatefulWidget {
+class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) => AuthenticationProvider(),
+      child: const RegisterPageContainer(),
+    );
+  }
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class RegisterPageContainer extends StatefulWidget {
+  const RegisterPageContainer({super.key});
+
+  @override
+  State<RegisterPageContainer> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPageContainer> {
   //text controllers
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();

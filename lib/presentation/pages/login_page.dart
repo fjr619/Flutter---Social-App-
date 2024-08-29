@@ -25,14 +25,26 @@ If the user doesn't have an account yet, they can go to the register page from h
 
 */
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) => AuthenticationProvider(),
+      child: const LoginPageContainer(),
+    );
+  }
 }
 
-class _LoginPageState extends State<LoginPage> {
+class LoginPageContainer extends StatefulWidget {
+  const LoginPageContainer({super.key});
+
+  @override
+  State<LoginPageContainer> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPageContainer> {
   //text controllers
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();

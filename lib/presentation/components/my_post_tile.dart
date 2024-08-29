@@ -14,8 +14,11 @@
 
 */
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/domain/model/post.dart';
+import 'package:flutter_twitter_clone/main.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_input_alert_box.dart';
 import 'package:flutter_twitter_clone/presentation/provider/auth_provider.dart';
 import 'package:flutter_twitter_clone/presentation/provider/database_provider.dart';
@@ -71,11 +74,14 @@ class _MyPostTileState extends State<MyPostTile> {
   }
 
   void showSuccessSnackbar(bool needPop, String message) {
-    if (needPop) context.pop();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message),
-      duration: const Duration(seconds: 1),
-    ));
+    if (needPop) navigatorKey.currentState?.pop();
+    final context = navigatorKey.currentContext;
+    if (context != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 1),
+      ));
+    }
   }
 
   _deletePost(BuildContext context) async {

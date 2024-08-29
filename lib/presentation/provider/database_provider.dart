@@ -46,23 +46,23 @@ class DatabaseProvider extends ChangeNotifier {
       {required String name, required String email}) async {
     log("start saveUserProfile");
     _isSaveUserProfile = false;
-    showDialog();
+    showLoading();
 
     final result =
         await databaseRepository.saveUserProfile(name: name, email: email);
     result.fold((failure) {}, (unit) {});
 
     _isSaveUserProfile = true;
-    hideDialog();
+    hideLoading();
   }
 
-  void showDialog() {
+  void showLoading() {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
   }
 
-  void hideDialog() {
+  void hideLoading() {
     _isLoading = false;
     notifyListeners();
   }
@@ -100,7 +100,9 @@ class DatabaseProvider extends ChangeNotifier {
   }
 
   Future<void> deleteUserInfo() async {
+    showLoading();
     await databaseRepository.deleteUserInfo();
+    hideLoading();
   }
 
   /*

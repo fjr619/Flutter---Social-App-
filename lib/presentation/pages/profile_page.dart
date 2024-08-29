@@ -66,10 +66,10 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
       try {
         final databaseProvider =
             Provider.of<DatabaseProvider>(context, listen: false);
-        databaseProvider.showDialog();
+        databaseProvider.showLoading();
         await databaseProvider.getUserProfile(widget.uid);
       } finally {
-        databaseProvider.hideDialog();
+        databaseProvider.hideLoading();
       }
     });
   }
@@ -87,7 +87,7 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
 
   // // save user bio
   Future<void> saveBio() async {
-    databaseProvider.showDialog();
+    databaseProvider.showLoading();
     await databaseProvider.updateUserBio(bioController.text);
     loadUser();
   }
