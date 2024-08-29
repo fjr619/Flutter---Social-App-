@@ -14,8 +14,6 @@
 
 */
 
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/main.dart';
