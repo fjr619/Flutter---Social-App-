@@ -5,6 +5,7 @@ import 'package:flutter_twitter_clone/data/repository/database_repository_impl.d
 import 'package:flutter_twitter_clone/domain/repository/auth_repository.dart';
 import 'package:flutter_twitter_clone/domain/repository/database_repository.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final getIt = GetIt.instance;
 
@@ -16,6 +17,10 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton<FirebaseFirestore>(
     () => FirebaseFirestore.instance,
   );
+
+  // Register SharedPreferences instance
+  final sharedPreferences = await SharedPreferences.getInstance();
+  getIt.registerSingleton<SharedPreferences>(sharedPreferences);
 
   //Repositories
   getIt.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl());
