@@ -16,7 +16,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/domain/model/comment.dart';
 import 'package:flutter_twitter_clone/domain/model/failure.dart';
 import 'package:flutter_twitter_clone/domain/model/post.dart';
-import 'package:flutter_twitter_clone/main.dart';
 import 'package:flutter_twitter_clone/navigation/go_router.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_comment_tile.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_post_tile.dart';

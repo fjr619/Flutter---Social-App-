@@ -200,7 +200,7 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
                       count: count.formatNumber(),
                       text: 'Followers',
                       onClicked: () => goToFollowingPage(context, widget.uid,
-                          databaseProvider.userProfile?.username ?? ''),
+                          databaseProvider.userProfile?.username ?? '', false),
                     );
                   },
                 ),
@@ -212,7 +212,7 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
                       count: count.formatNumber(),
                       text: 'Following',
                       onClicked: () => goToFollowingPage(context, widget.uid,
-                          databaseProvider.userProfile?.username ?? ''),
+                          databaseProvider.userProfile?.username ?? '', true),
                     );
                   },
                 ),

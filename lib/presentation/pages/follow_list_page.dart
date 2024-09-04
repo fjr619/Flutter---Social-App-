@@ -11,7 +11,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_twitter_clone/domain/model/following.dart';
-import 'package:flutter_twitter_clone/domain/model/user_profile.dart';
 import 'package:flutter_twitter_clone/navigation/go_router.dart';
 import 'package:flutter_twitter_clone/presentation/components/my_user_tile.dart';
 import 'package:flutter_twitter_clone/presentation/provider/database_provider.dart';
@@ -20,7 +19,12 @@ import 'package:provider/provider.dart';
 class FollowListPage extends StatefulWidget {
   final String userName;
   final String uid;
-  const FollowListPage({super.key, required this.uid, required this.userName});
+  final bool isFollowingTab;
+  const FollowListPage(
+      {super.key,
+      required this.uid,
+      required this.userName,
+      required this.isFollowingTab});
 
   @override
   State<FollowListPage> createState() => _FollowListPageState();
@@ -115,6 +119,7 @@ class _FollowListPageState extends State<FollowListPage> {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
+      initialIndex: widget.isFollowingTab ? 1 : 0,
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
         appBar: AppBar(

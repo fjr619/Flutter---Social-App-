@@ -164,11 +164,14 @@ Provider<GoRouter> router() {
             pageBuilder: (context, state) {
               final uid = state.pathParameters["uid"]!;
               final userName = state.pathParameters["userName"]!;
+              final isFollowing =
+                  state.uri.queryParameters["isFollowing"] == 'true';
               return buildTransitionpage(
                 key: state.pageKey,
                 child: FollowListPage(
                   uid: uid,
                   userName: userName,
+                  isFollowingTab: isFollowing,
                 ),
               );
             },
@@ -213,7 +216,9 @@ void goAccountSettingsPage(BuildContext context) {
   context.pushNamed(AppRoute.accountSettings);
 }
 
-void goToFollowingPage(BuildContext context, String uid, String userName) {
+void goToFollowingPage(
+    BuildContext context, String uid, String userName, bool isFollowing) {
   context.pushNamed(AppRoute.following,
-      pathParameters: {'uid': uid, 'userName': userName});
+      pathParameters: {'uid': uid, 'userName': userName},
+      queryParameters: {'isFollowing': '$isFollowing'});
 }

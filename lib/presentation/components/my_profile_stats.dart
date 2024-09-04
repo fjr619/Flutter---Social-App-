@@ -30,6 +30,7 @@ class MyProfileStats extends StatelessWidget {
     var textStyleForText =
         TextStyle(color: Theme.of(context).colorScheme.primary);
     return InkWell(
+      borderRadius: BorderRadius.circular(8),
       onTap: onClicked,
       child: SizedBox(
         width: 100,
