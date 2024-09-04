@@ -117,72 +117,90 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
 
       WriteBatch batch = _db.batch();
 
-      // dlete user doc
-      DocumentReference userDoc = _db.collection('Users').doc(uid);
-      batch.delete(userDoc);
+      // update followers and following records
+      QuerySnapshot userFollows =
+          await _db.collection('Users').doc(uid).collection('Following').get();
 
-      // delete user posts
-      QuerySnapshot userPosts =
-          await _db.collection('Posts').where('uid', isEqualTo: uid).get();
-      for (var post in userPosts.docs) {
-        batch.delete(post.reference);
+      for (var followDoc in userFollows.docs) {
+        Following following = Following.fromDocument(followDoc);
+        await unfollowUser(following.uid);
       }
 
-      // delete user comments
-      QuerySnapshot userComments =
-          await _db.collection('Comments').where('uid', isEqualTo: uid).get();
+      // // dlete user doc
+      // DocumentReference userDoc = _db.collection('Users').doc(uid);
+      // batch.delete(userDoc);
 
-      for (var commentQuery in userComments.docs) {
-        // Convert each document to a Comment data class
-        Comment comment = Comment.fromDocument(commentQuery);
+      // Now handle the rest in parallel
+      await Future.wait([
+        // Delete user doc
+        _db.collection('Users').doc(uid).get().then(
+          (value) {
+            batch.delete(value.reference);
+          },
+        ),
 
-        DocumentReference postDoc = _db.collection('Posts').doc(comment.postId);
+        // Delete user posts
+        _db
+            .collection('Posts')
+            .where('uid', isEqualTo: uid)
+            .get()
+            .then((userPosts) {
+          for (var post in userPosts.docs) {
+            batch.delete(post.reference);
+          }
+        }),
 
-        //update comment count
-        await _db.runTransaction(
-          (transaction) async {
-            // get post data
-            DocumentSnapshot postSnapshot = await transaction.get(postDoc);
+        // Delete user comments
+        _db
+            .collection('Comments')
+            .where('uid', isEqualTo: uid)
+            .get()
+            .then((userComments) async {
+          for (var commentQuery in userComments.docs) {
+            Comment comment = Comment.fromDocument(commentQuery);
+            DocumentReference postDoc =
+                _db.collection('Posts').doc(comment.postId);
 
-            // get comment count
-            int currentCommentCount = postSnapshot['commentCount'] ?? 0;
-            if (currentCommentCount != 0) currentCommentCount--;
-
-            transaction.update(
-              postDoc,
-              {
-                'commentCount': currentCommentCount,
+            // Update comment count
+            await _db.runTransaction(
+              (transaction) async {
+                DocumentSnapshot postSnapshot = await transaction.get(postDoc);
+                int currentCommentCount = postSnapshot['commentCount'] ?? 0;
+                if (currentCommentCount != 0) currentCommentCount--;
+                transaction.update(
+                  postDoc,
+                  {'commentCount': currentCommentCount},
+                );
               },
             );
-          },
-        );
 
-        batch.delete(commentQuery.reference);
-      }
+            batch.delete(commentQuery.reference);
+          }
+        }),
 
-      // delete likes done by this user
-      QuerySnapshot allPosts = await _db.collection('Posts').get();
-      for (QueryDocumentSnapshot post in allPosts.docs) {
-        Map<String, dynamic> postData = post.data() as Map<String, dynamic>;
-        var likedBy = postData['likedBy'] as List<dynamic>;
+        // Delete likes done by this user
+        _db.collection('Posts').get().then((allPosts) {
+          for (QueryDocumentSnapshot post in allPosts.docs) {
+            Map<String, dynamic> postData = post.data() as Map<String, dynamic>;
+            var likedBy = postData['likedBy'] as List<dynamic>;
 
-        if (likedBy.contains(uid)) {
-          batch.update(
-            post.reference,
-            {
-              'likedBy': FieldValue.arrayRemove([uid]),
-              'likeCount': FieldValue.increment(-1),
-            },
-          );
-        }
-      }
+            if (likedBy.contains(uid)) {
+              batch.update(
+                post.reference,
+                {
+                  'likedBy': FieldValue.arrayRemove([uid]),
+                  'likeCount': FieldValue.increment(-1),
+                },
+              );
+            }
+          }
+        }),
+      ]);
 
-      // update followers and following records
-
-      // commit batch
+      // Commit batch after all parallel operations are done
       await batch.commit();
 
-      // delete user
+      // Delete user account
       await _auth.deleteUser();
     }
   }

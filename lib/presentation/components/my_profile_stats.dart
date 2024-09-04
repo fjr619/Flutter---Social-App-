@@ -18,8 +18,10 @@ import 'package:flutter/material.dart';
 class MyProfileStats extends StatelessWidget {
   final String count;
   final String text;
+  final Function()? onClicked;
 
-  const MyProfileStats({super.key, required this.count, required this.text});
+  const MyProfileStats(
+      {super.key, required this.count, required this.text, this.onClicked});
 
   @override
   Widget build(BuildContext context) {
@@ -27,19 +29,22 @@ class MyProfileStats extends StatelessWidget {
         fontSize: 20, color: Theme.of(context).colorScheme.inversePrimary);
     var textStyleForText =
         TextStyle(color: Theme.of(context).colorScheme.primary);
-    return SizedBox(
-      width: 100,
-      child: Column(
-        children: [
-          Text(
-            count,
-            style: textStyleForCount,
-          ),
-          Text(
-            text,
-            style: textStyleForText,
-          )
-        ],
+    return InkWell(
+      onTap: onClicked,
+      child: SizedBox(
+        width: 100,
+        child: Column(
+          children: [
+            Text(
+              count,
+              style: textStyleForCount,
+            ),
+            Text(
+              text,
+              style: textStyleForText,
+            )
+          ],
+        ),
       ),
     );
   }

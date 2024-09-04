@@ -197,7 +197,11 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
                   builder: (context, snapshot) {
                     var count = snapshot.data?.length ?? 0;
                     return MyProfileStats(
-                        count: count.formatNumber(), text: 'Followers');
+                      count: count.formatNumber(),
+                      text: 'Followers',
+                      onClicked: () => goToFollowingPage(context, widget.uid,
+                          databaseProvider.userProfile?.username ?? ''),
+                    );
                   },
                 ),
                 StreamBuilder(
@@ -205,7 +209,11 @@ class _ProfilePageContentState extends State<ProfilePageContent> {
                   builder: (context, snapshot) {
                     var count = snapshot.data?.length ?? 0;
                     return MyProfileStats(
-                        count: count.formatNumber(), text: 'Following');
+                      count: count.formatNumber(),
+                      text: 'Following',
+                      onClicked: () => goToFollowingPage(context, widget.uid,
+                          databaseProvider.userProfile?.username ?? ''),
+                    );
                   },
                 ),
               ],

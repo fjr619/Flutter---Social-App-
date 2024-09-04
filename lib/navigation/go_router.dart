@@ -3,6 +3,7 @@ import 'package:flutter_twitter_clone/domain/model/post.dart';
 import 'package:flutter_twitter_clone/main.dart';
 import 'package:flutter_twitter_clone/presentation/pages/account_settings_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/blocked_user_page.dart';
+import 'package:flutter_twitter_clone/presentation/pages/follow_list_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/home_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/login_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/post_page.dart';
@@ -23,6 +24,7 @@ class AppRoute {
   static const String post = "Post";
   static const String blockedUser = "BlockedUser";
   static const String accountSettings = "AccountSettings";
+  static const String following = "Following";
 }
 
 Provider<GoRouter> router() {
@@ -154,6 +156,23 @@ Provider<GoRouter> router() {
               );
             },
           ),
+
+          //following
+          GoRoute(
+            path: '/following/:uid/:userName',
+            name: AppRoute.following,
+            pageBuilder: (context, state) {
+              final uid = state.pathParameters["uid"]!;
+              final userName = state.pathParameters["userName"]!;
+              return buildTransitionpage(
+                key: state.pageKey,
+                child: FollowListPage(
+                  uid: uid,
+                  userName: userName,
+                ),
+              );
+            },
+          ),
         ],
       );
     },
@@ -192,4 +211,9 @@ void goBlockedUserPage(BuildContext context) {
 
 void goAccountSettingsPage(BuildContext context) {
   context.pushNamed(AppRoute.accountSettings);
+}
+
+void goToFollowingPage(BuildContext context, String uid, String userName) {
+  context.pushNamed(AppRoute.following,
+      pathParameters: {'uid': uid, 'userName': userName});
 }
