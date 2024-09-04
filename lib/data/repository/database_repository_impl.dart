@@ -873,4 +873,27 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
       return followingList.any((following) => following.uid == targetUid);
     });
   }
+
+  /*
+    SEARCH
+  */
+
+  // search for users by name
+  Future<List<UserProfile>> searchUsers(String searchTerm) async {
+    try {
+      QuerySnapshot snapshot = await _db
+          .collection('Users')
+          .where('username', isGreaterThanOrEqualTo: searchTerm)
+          .where('username', isLessThanOrEqualTo: '$searchTerm\uf8ff')
+          .get();
+
+      return snapshot.docs
+          .map(
+            (doc) => UserProfile.fromDocument(doc),
+          )
+          .toList();
+    } catch (e) {
+      return [];
+    }
+  }
 }

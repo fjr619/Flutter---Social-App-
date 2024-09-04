@@ -9,6 +9,7 @@ import 'package:flutter_twitter_clone/presentation/pages/login_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/post_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/profile_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/register_page.dart';
+import 'package:flutter_twitter_clone/presentation/pages/search_page.dart';
 import 'package:flutter_twitter_clone/presentation/pages/settings_page.dart';
 import 'package:flutter_twitter_clone/presentation/provider/auth_provider.dart';
 import 'package:flutter_twitter_clone/presentation/provider/database_provider.dart';
@@ -25,6 +26,7 @@ class AppRoute {
   static const String blockedUser = "BlockedUser";
   static const String accountSettings = "AccountSettings";
   static const String following = "Following";
+  static const String search = 'Search';
 }
 
 Provider<GoRouter> router() {
@@ -176,6 +178,18 @@ Provider<GoRouter> router() {
               );
             },
           ),
+
+          //search
+          GoRoute(
+            name: AppRoute.search,
+            path: '/search',
+            pageBuilder: (context, state) {
+              return buildTransitionpage(
+                key: state.pageKey,
+                child: const SearchPage(),
+              );
+            },
+          ),
         ],
       );
     },
@@ -221,4 +235,12 @@ void goToFollowingPage(
   context.pushNamed(AppRoute.following,
       pathParameters: {'uid': uid, 'userName': userName},
       queryParameters: {'isFollowing': '$isFollowing'});
+}
+
+void goSettingPage(BuildContext context) {
+  context.pushNamed(AppRoute.settings);
+}
+
+void goSearchPage(BuildContext context) {
+  context.pushNamed(AppRoute.search);
 }

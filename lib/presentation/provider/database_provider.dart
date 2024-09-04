@@ -226,4 +226,12 @@ class DatabaseProvider extends ChangeNotifier {
   Stream<List<Post>> getFollowingPosts() {
     return databaseRepository.getFollowingPosts();
   }
+
+  /*
+    SEARCH
+   */
+
+  Future<List<UserProfile>> searchUsers(String searchTerm) {
+    return databaseRepository.searchUsers(searchTerm);
+  }
 }

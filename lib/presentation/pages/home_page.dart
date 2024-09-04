@@ -53,11 +53,7 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-  }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
     // Initialize BehaviorSubjects with an initial empty list
     _allPostsSubject =
         BehaviorSubject<Either<Failure, List<Post>>>.seeded(const Right([]));
@@ -196,9 +192,13 @@ class _HomePageState extends State<HomePage>
             goUserPage(context,
                 context.read<AuthenticationProvider>().currentUser!.uid);
           },
+          onClickSearch: () {
+            context.pop();
+            goSearchPage(context);
+          },
           onClickSettings: () {
             context.pop();
-            context.pushNamed(AppRoute.settings);
+            goSettingPage(context);
           },
           onClickLogout: logout,
         ),

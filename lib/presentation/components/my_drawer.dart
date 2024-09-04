@@ -26,12 +26,14 @@ class MyDrawer extends StatelessWidget {
       required this.onClickHome,
       required this.onClickProfile,
       required this.onClickSettings,
-      required this.onClickLogout});
+      required this.onClickLogout,
+      required this.onClickSearch});
 
   final Function() onClickHome;
   final Function() onClickProfile;
   final Function() onClickSettings;
   final Function() onClickLogout;
+  final Function() onClickSearch;
 
   // Build UI
   @override
@@ -77,7 +79,7 @@ class MyDrawer extends StatelessWidget {
               MyDrawerTile(
                 title: 'S E A R C H',
                 icon: Icons.search_outlined,
-                onClick: () {},
+                onClick: onClickSearch,
               ),
 
               // settings

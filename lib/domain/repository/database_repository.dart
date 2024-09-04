@@ -35,4 +35,6 @@ abstract class DatabaseRepository {
   Stream<List<Following>> getFollowers(String uid);
   Stream<List<Following>> getFollowing(String uid);
   Stream<bool> isUserFollowed(String targetUid);
+
+  Future<List<UserProfile>> searchUsers(String searchTerm);
 }
