@@ -413,7 +413,17 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
   @override
   Stream<List<Post>> getFollowingPosts() {
     String currentUserId = _auth.currentUser!.uid;
-    return getFollowing(currentUserId).asyncMap(
+
+    // Stream of blocked user IDs
+    Stream<List<String>> blockedUserIdStream = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(currentUserId)
+        .collection('BlockedUsers')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) => doc.id).toList());
+
+    // Stream of posts from the following users
+    Stream<List<Post>> postsStream = getFollowing(currentUserId).asyncMap(
       (followingUserIds) {
         return _getPostsFromFollowing(
           followingUserIds.map(
@@ -422,6 +432,18 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
             },
           ).toList(),
         ).first;
+      },
+    );
+
+    // Combine the two streams to filter posts
+    return Rx.combineLatest2<List<String>, List<Post>, List<Post>>(
+      blockedUserIdStream,
+      postsStream,
+      (blockedUserIds, posts) {
+        // Filter posts based on blocked user IDs
+        return posts
+            .where((post) => !blockedUserIds.contains(post.uid))
+            .toList();
       },
     );
   }
