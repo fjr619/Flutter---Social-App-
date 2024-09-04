@@ -366,6 +366,66 @@ class DatabaseRepositoryImpl implements DatabaseRepository {
     }
   }
 
+  // Helper function to chunk the list into smaller batches of 10 IDs
+  List<List<String>> _chunkList(List<String> list, int chunkSize) {
+    List<List<String>> chunks = [];
+    for (var i = 0; i < list.length; i += chunkSize) {
+      chunks.add(list.sublist(
+          i, i + chunkSize > list.length ? list.length : i + chunkSize));
+    }
+    return chunks;
+  }
+
+  Stream<List<Post>> _getPostsFromFollowing(
+      List<String> followingUserIds) async* {
+    if (followingUserIds.isEmpty) {
+      yield [];
+      return;
+    }
+
+    // Split the followingUserIds list into chunks of 10
+    List<List<String>> userIdChunks = _chunkList(followingUserIds, 10);
+
+    List<Post> allPosts = [];
+
+    // Perform Firestore queries for each chunk and combine the results
+    for (var chunk in userIdChunks) {
+      var postsQuerySnapshot = await _db
+          .collection('Posts')
+          .where('uid', whereIn: chunk)
+          .orderBy('timestamp',
+              descending: true) // Sort by timestamp in descending order
+          .get();
+
+      List<Post> posts =
+          postsQuerySnapshot.docs.map((doc) => Post.fromDocument(doc)).toList();
+      allPosts.addAll(posts);
+    }
+
+    // Sort the combined posts by timestamp in descending order (in case we get posts from multiple chunks)
+    allPosts.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+    // Emit the combined and sorted list of posts
+    yield allPosts;
+  }
+
+  // Combines the following stream and the post stream
+  @override
+  Stream<List<Post>> getFollowingPosts() {
+    String currentUserId = _auth.currentUser!.uid;
+    return getFollowing(currentUserId).asyncMap(
+      (followingUserIds) {
+        return _getPostsFromFollowing(
+          followingUserIds.map(
+            (following) {
+              return following.uid;
+            },
+          ).toList(),
+        ).first;
+      },
+    );
+  }
+
   /*
     LIKES
   */

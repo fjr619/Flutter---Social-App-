@@ -16,6 +16,7 @@ abstract class DatabaseRepository {
   Stream<Either<Failure, List<Post>>> getAllPosts();
   Stream<Either<Failure, List<Post>>> getPostsUID(String uid);
   Stream<Either<Failure, Post>> getPost(String id);
+  Stream<List<Post>> getFollowingPosts();
 
   Future<Either<Failure, Unit>> deletePost(String postId);
   Future<Either<Failure, Unit>> toggleLikeInFirebase(String postId);

@@ -118,6 +118,21 @@ class DatabaseProvider extends ChangeNotifier {
     return databaseRepository.getAllPosts();
   }
 
+  Stream<List<Post>> loadAllPostsa() {
+    return databaseRepository.getAllPosts().map(
+      (either) {
+        return either.fold(
+          (failure) {
+            return [];
+          },
+          (data) {
+            return data;
+          },
+        );
+      },
+    );
+  }
+
   Stream<Either<Failure, List<Post>>> getUserPosts(String uid) {
     return databaseRepository.getPostsUID(uid);
   }
@@ -206,5 +221,9 @@ class DatabaseProvider extends ChangeNotifier {
 
   Stream<bool> isUserFollowed(String uid) {
     return databaseRepository.isUserFollowed(uid);
+  }
+
+  Stream<List<Post>> getFollowingPosts() {
+    return databaseRepository.getFollowingPosts();
   }
 }
